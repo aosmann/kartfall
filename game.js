@@ -222,6 +222,7 @@ function genTrack(def){
   for(let i=0;i<TN;i++){const a=(i-1+TN)%TN,b=(i+1)%TN;let tx=PX[b]-PX[a],tz=PZ[b]-PZ[a];const l=Math.hypot(tx,tz)||1;TX[i]=tx/l;TZ[i]=tz/l}
   for(let i=0;i<TN;i++){const j=(i+2)%TN,k=(i-2+TN)%TN;CU[i]=(TX[k]*TZ[j]-TZ[k]*TX[j])/(4*STEP)} // >0 bends right
   for(let pass=0;pass<4;pass++){const cp=PY.slice();for(let i=0;i<TN;i++){let s=0;for(let k=-8;k<=8;k++)s+=cp[(i+k+TN)%TN];PY[i]=s/17}}
+  for(let i=0;i<TN;i++)PY[i]=Math.max(0,PY[i]); // the smoothed curve can undershoot: keep the road above the ground
   JUMPS=[];
   (def.jumps||[]).forEach(f=>{const c0=Math.round(f*TN);let best=c0,bv=1e9;
     for(let d=-50;d<=50;d++){const i=(c0+d+TN)%TN;let v=0;for(let k=-28;k<=14;k++)v+=Math.abs(CU[(i+k+TN)%TN]);if(v<bv){bv=v;best=i}}
@@ -251,6 +252,9 @@ function strip(fa,fb,colorOf,opts={}){const pos=[],col=[],c=new THREE.Color();co
 function distToTrack(x,z){let b=1e9,bi=0;for(let i=0;i<TN;i+=4){const dx=x-PX[i],dz=z-PZ[i],d=dx*dx+dz*dz;if(d<b){b=d;bi=i}}return[Math.sqrt(b),bi]}
 function insideLoop(x,z){let inside=false;for(let i=0,j=TN-4;i<TN;j=i,i+=4){const xi=PX[i],zi=PZ[i],xj=PX[j],zj=PZ[j];if(((zi>z)!==(zj>z))&&(x<(xj-xi)*(z-zi)/(zj-zi)+xi))inside=!inside}return inside}
 
+// embankment width: slope 1.5 down to the ground, but on the inside of a bend never past ~80% of the bend radius (else it folds over the road)
+function skirtW(k,sd){let w=RAIL+.8+PY[k]*1.5;let c=0;for(let d=-6;d<=6;d++)c+=CU[(k+d+TN)%TN];c/=13;const inner=(c>0&&sd>0)||(c<0&&sd<0);
+  if(inner&&Math.abs(c)>1e-4)w=Math.min(w,Math.max(RAIL+.9,.8/Math.abs(c)));return w}
 function buildWorld(){
   disposeWorld();world=new THREE.Group();scene.add(world);props=[];gantryLamps=[];water=null;snowPts=null;balloons=[];windmill=null;crowd=null;flagMeshes=[];
   const th=THEMES[TRACK.id],r=rng(TRACK.id.length*7919+TRACK.id.charCodeAt(0));
@@ -313,7 +317,7 @@ function buildWorld(){
     world.add(strip(k=>[sd*(RAIL+.45),Y(k)+1.12],k=>[sd*(RAIL+.45),Y(k)+.55],()=>0xd5dde8));
     world.add(strip(k=>[sd*RAIL,Y(k)+.55],k=>[sd*(RAIL+.45),Y(k)+.55],()=>0xc6cfdb));
     const bridge=k=>TRACK.id==='beach'&&PY[k]>1.6;
-    world.add(strip(k=>[sd*(RAIL+.6),Y(k)+.04],k=>bridge(k)?[sd*(RAIL+.6),Y(k)-1.1]:[sd*(RAIL+.8+PY[k]*1.5),-.07],k=>bridge(k)?0xe8edf3:th.skirt,{step:1}));
+    world.add(strip(k=>[sd*(RAIL+.6),Y(k)+.04],k=>bridge(k)?[sd*(RAIL+.6),Y(k)-1.1]:[sd*skirtW(k,sd),-.07],k=>bridge(k)?0xe8edf3:th.skirt,{step:1}));
   }
   {const posts=[];for(let i=0;i<TN;i+=3)for(const sd of[-1,1]){const lat=sd*(RAIL+.22),k=i;posts.push([PX[k]-TZ[k]*lat,PY[k]+.28,PZ[k]+TX[k]*lat])}
     const im=new THREE.InstancedMesh(BOX(.22,.56,.22),new THREE.MeshLambertMaterial({color:th.post}),posts.length);posts.forEach((p,i)=>im.setMatrixAt(i,MX(...p)));world.add(im)}
@@ -588,7 +592,7 @@ function genLayout(seed,laps){const r=rng(seed*31+laps*977+TRACK.id.length*131+5
 /* ======================= GAME STATE ======================= */
 // states: menu · wait · count · run · paused · finish · over · spec
 let state='menu',raceNo=0;
-const VB=27,VBOOST=38,VSLOW=15,VSPIN=8,VFIN=17,KMH=3.2,GRAV=32;
+const VB=27,VBOOST=46,VSLOW=15,VSPIN=8,VFIN=17,KMH=3.2,GRAV=32;
 const me={dist:0,v:0,lane:1,lx:0,boostT:0,slowT:0,spinT:0,spin:0,fin:false,finAt:0,k:null};
 let raceT=0,countT=0,right=0,asked=0,streak=0,bestStreak=0,missed=[],coins=0,qNext=null,gLo=0,oLo=0,cLo=0,lastLap=1,finPos=0,finTime=0,finishT=0,score=0;
 let shown=null,shownT=0,racers=6,menuBot=0;
@@ -607,7 +611,7 @@ const BOT_DEF=[{name:'DJ',cat:'dj',c:0x2f80ff,acc:.88,vb:26.4,hit:.12},{name:'Pa
 const bots=BOT_DEF.map(d=>{const k=makeKart(d.c,0xffffff);setTag(k,d.name,d.c);scene.add(k.g);loadAvatar(catUrl(d.cat),av=>{if(av)setFace(k,av)});
   return Object.assign({k,dist:0,v:0,lane:1,lx:0,boostT:0,slowT:0,spinT:0,spin:0,gi:0,oi:0,fin:false,finAt:0,decided:-1,laneT:0},d)});
 function speedTarget(o,vb){return o.spinT>0?VSPIN:o.slowT>0?VSLOW:(o.boostT>0||o.dash)?VBOOST:vb}
-function stepSpeed(o,target,dt){const a=target>o.v?(o.boostT>0?16:9):(o.spinT>0?40:20);o.v+=clamp(target-o.v,-a*dt,a*dt)}
+function stepSpeed(o,target,dt){const a=target>o.v?((o.boostT>0||o.dash)?24:9):(o.spinT>0?40:20);o.v+=clamp(target-o.v,-a*dt,a*dt)}
 function timers(o,dt){if(o.boostT>0)o.boostT-=dt;if(o.slowT>0)o.slowT-=dt;if(o.spinT>0){o.spinT-=dt;o.spin+=dt*Math.PI*2/.9}else o.spin=0}
 function stepBot(b,dt,racing){timers(b,dt);
   if(racing&&!b.fin){const gap=b.dist-me.dist;let vb=b.vb+(gap>120?-1.6:gap<-120?1.4:0);stepSpeed(b,speedTarget(b,vb),dt);
@@ -769,7 +773,7 @@ function paintHud(force){
   const pos=posNow();if(String(racers)!==$('posT').textContent)$('posT').textContent=racers;if(pos!==lastPos||force){$('posN').textContent=pos;$('posSuf').textContent=ord(pos);
     if(pos<lastPos&&!force){const c=$('posBig');c.classList.remove('up');void c.offsetWidth;c.classList.add('up')}lastPos=pos}
   $('lapN').textContent=lapNow();
-  const kmh=Math.round(me.v*KMH);$('spd').textContent=kmh;$('gArc').setAttribute('stroke-dasharray',`${clamp(kmh/130*100,0,100)} 100`);$('gauge').classList.toggle('boost',me.boostT>0||me.dash);
+  const kmh=Math.round(me.v*KMH);$('spd').textContent=kmh;$('gArc').setAttribute('stroke-dasharray',`${clamp(kmh/150*100,0,100)} 100`);$('gauge').classList.toggle('boost',me.boostT>0||me.dash);
   $('timeChip').textContent=fmtT(raceT);drawMini();paintTurbo()}
 
 /* ---------- confetti ---------- */
