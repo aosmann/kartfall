@@ -577,9 +577,11 @@ let D=1,layout={gates:[],obs:[],coins:[]};
 function genLayout(seed,laps){const r=rng(seed*31+laps*977+TRACK.id.length*131+5);D=laps*TL;const gates=[],obs=[],coins=[];
   let s=95;while(s<D-70){if(nearJump(s,40,30)){s+=12;continue}gates.push({s,Q:null,done:false,set:null,pick:-1});s+=125+r()*30}
   const marks=[0,...gates.map(g=>g.s),D-25];const special=THEMES[TRACK.id].obst;
-  for(let k=0;k<marks.length-1;k++){let p=(k===0?60:marks[k]+30)+r()*8;const b=marks[k+1]-30;let last=-1;
-    while(p<b){if(nearJump(p,20,22)){p+=10;continue}let lane=r()*3|0;if(lane===last)lane=(lane+1+(r()*2|0))%3;const u=r();
-      const type=u<.25?'cones':u<.45?'tyres':u<.65?(TRACK.id==='snow'?'ice':'oil'):special;obs.push({s:p,lane,type,obj:null,hit:false});last=lane;p+=26+r()*16}
+  // one obstacle per gap, early in it (just after the previous pads), so the run-up to every question stays clear for reading
+  for(let k=0;k<marks.length-1;k++){const b=marks[k+1]-30;
+    if(k>0){let p=marks[k]+28+r()*10;while(p<b&&nearJump(p,20,22))p+=10;
+      if(p<Math.min(b,marks[k]+(marks[k+1]-marks[k])*.45)){const lane=r()*3|0,u=r();
+        const type=u<.25?'cones':u<.45?'tyres':u<.65?(TRACK.id==='snow'?'ice':'oil'):special;obs.push({s:p,lane,type,obj:null,hit:false})}}
     // a row of coins in a free lane
     const cs=marks[k]+(k===0?30:20),ce=Math.min(b,cs+40);if(ce-cs>12){const lane=r()*3|0;for(let c=cs;c<ce;c+=4.2){if(obs.some(o=>o.lane===lane&&Math.abs(o.s-c)<6)||nearJump(c,4,6))continue;coins.push({s:c,lane,got:false})}}}
   return{gates,obs,coins}}
