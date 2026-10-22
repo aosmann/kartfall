@@ -1,4 +1,5 @@
-/* EduQ v3 — shared question bank for the educational games portal (Lanefall, Stackfall, Slicefall, …).
+/* EduQ v4 — v4: textbook units (topic.unit = book; Topics / Units tabs via EduQ.topicTabs + topicsOf; units stay out of Mix).
+   EduQ v3 — shared question bank for the educational games portal (Lanefall, Stackfall, Slicefall, …).
    Extracted from Lanefall v10. v2: no repeats inside a run (a level that runs dry borrows from the topic's other
    levels; only when the whole topic is used up does next() repeat, flagged with Q.repeat and next.exhausted),
    and much bigger banks for the fixed-list topics.
@@ -314,6 +315,109 @@ const units=fixedL({1:[["Bits in 1 byte","8","4","16"],["Binary uses 0 and…","
   ["Different values in 16 bits","65536","65535","32768"],["Largest value in 4 bits","15","16","8"],["Hex digits needed for 1 byte","2","1","4"],["kB in 1 MB","1000","100","10"]]});
 
 /* ---- Subjects & topics ---- */
+/* ---- English units (a class's textbook units). Short, fast questions; a unit topic has unit:'<book>' ---- */
+const fixedT=b=>byLv(b,list=>{const d=deck(list);return()=>{const [q,c,a,b2,tag]=d();return{q,c,w:[a,b2],tag}}});
+const enUnit1=fixedT({1:[
+ ["___ Monday", "on", "in", "at", "Prepositions of time"],
+ ["___ 7 o'clock", "at", "on", "in", "Prepositions of time"],
+ ["___ May", "in", "on", "at", "Prepositions of time"],
+ ["___ the morning", "in", "on", "at", "Prepositions of time"],
+ ["___ the weekend", "at", "in", "on", "Prepositions of time"],
+ ["___ night", "at", "in", "on", "Prepositions of time"],
+ ["___ 2020", "in", "on", "at", "Prepositions of time"],
+ ["___ 6th May", "on", "in", "at", "Prepositions of time"],
+ ["___ the evening", "in", "on", "at", "Prepositions of time"],
+ ["___ half past ten", "at", "in", "on", "Prepositions of time"],
+ ["___ Sundays", "on", "in", "at", "Prepositions of time"],
+ ["___ December", "in", "at", "on", "Prepositions of time"],
+ ["___ your teeth", "brush", "wash", "make", "Everyday activities"],
+ ["___ dressed", "get", "do", "have", "Everyday activities"],
+ ["___ homework", "do", "make", "play", "Everyday activities"],
+ ["___ breakfast", "have", "do", "make", "Everyday activities"],
+ ["___ to bed", "go", "get", "do", "Everyday activities"],
+ ["wake ___", "up", "on", "in", "Everyday activities"],
+ ["___ your school bag", "pack", "brush", "finish", "Everyday activities"],
+ ["___ home at 8", "leave", "start", "finish", "Everyday activities"],
+ ["___ an instrument", "play", "do", "go", "Free-time activities"],
+ ["___ exercise", "do", "play", "go", "Free-time activities"],
+ ["___ shopping", "go", "do", "play", "Free-time activities"],
+ ["hang ___ with friends", "out", "up", "on", "Free-time activities"],
+ ["listen ___ music", "to", "at", "for", "Free-time activities"],
+ ["take ___", "photos", "books", "music", "Free-time activities"],
+ ["play board ___", "games", "sports", "photos", "Free-time activities"],
+ ["chat ___", "online", "music", "films", "Free-time activities"],
+ ["Watch a film at the ___", "cinema", "library", "museum", "Places in a town"],
+ ["Borrow books at the ___", "library", "café", "stadium", "Places in a town"],
+ ["Swim at the ___", "swimming pool", "theatre", "library", "Places in a town"],
+ ["See a play at the ___", "theatre", "gym", "park", "Places in a town"],
+ ["Paintings? Go to the ___", "art gallery", "stadium", "gym", "Places in a town"],
+ ["Eat a meal at a ___", "restaurant", "museum", "library", "Places in a town"],
+ ["Learn history at a ___", "museum", "gym", "café", "Places in a town"],
+ ["Football match? The ___", "stadium", "library", "theatre", "Places in a town"],
+ ["Buy clothes at the ___", "shopping centre", "sports centre", "museum", "Places in a town"],
+ ["Walk and play in the ___", "park", "cinema", "library", "Places in a town"]],
+2:[
+ ["She ___ in Paris.", "lives", "live", "living", "Present simple: he/she/it"],
+ ["He ___ football.", "plays", "play", "playing", "Present simple: he/she/it"],
+ ["Dad ___ TV.", "watches", "watchs", "watch", "Present simple: he/she/it"],
+ ["She ___ to school.", "goes", "gos", "go", "Present simple: he/she/it"],
+ ["He ___ his homework.", "does", "dos", "do", "Present simple: he/she/it"],
+ ["Tom ___ English.", "studies", "studys", "study", "Present simple: he/she/it"],
+ ["School ___ at 8.", "starts", "start", "starting", "Present simple: he/she/it"],
+ ["She ___ a shower.", "has", "haves", "have", "Present simple: he/she/it"],
+ ["I ___ like tea.", "don't", "doesn't", "not", "Negatives and questions"],
+ ["She ___ like tea.", "doesn't", "don't", "isn't", "Negatives and questions"],
+ ["They ___ play tennis.", "don't", "doesn't", "aren't", "Negatives and questions"],
+ ["He doesn't ___ fish.", "eat", "eats", "eating", "Negatives and questions"],
+ ["___ you like pizza?", "Do", "Does", "Are", "Negatives and questions"],
+ ["___ she live here?", "Does", "Do", "Is", "Negatives and questions"],
+ ["Does he ___ guitar?", "play", "plays", "playing", "Negatives and questions"],
+ ["Where ___ they live?", "do", "does", "are", "Negatives and questions"],
+ ["Do you swim? Yes, I ___.", "do", "does", "am", "Short answers"],
+ ["Does she cook? No, she ___.", "doesn't", "don't", "isn't", "Short answers"],
+ ["Do they walk? Yes, they ___.", "do", "does", "are", "Short answers"],
+ ["Does it rain? Yes, it ___.", "does", "do", "is", "Short answers"],
+ ["100% of the time", "always", "usually", "often", "Adverbs of frequency"],
+ ["0% of the time", "never", "hardly ever", "sometimes", "Adverbs of frequency"],
+ ["Almost never", "hardly ever", "never", "sometimes", "Adverbs of frequency"],
+ ["Most of the time", "usually", "always", "hardly ever", "Adverbs of frequency"],
+ ["___ Saturday afternoon", "on", "in", "at", "Prepositions of time"],
+ ["___ my birthday", "on", "in", "at", "Prepositions of time"],
+ ["___ the afternoon", "in", "on", "at", "Prepositions of time"],
+ ["___ lunchtime", "at", "in", "on", "Prepositions of time"],
+ ["___ winter", "in", "on", "at", "Prepositions of time"],
+ ["___ the end of May", "at", "in", "on", "Prepositions of time"]],
+3:[
+ ["I ___ to school. (always)", "always walk", "walk always", "always walks", "Adverbs of frequency"],
+ ["She ___ late. (never)", "is never", "never is", "never", "Adverbs of frequency"],
+ ["We ___ to the park. (often)", "often go", "go often", "often goes", "Adverbs of frequency"],
+ ["They ___ tired. (usually)", "are usually", "usually are", "usually", "Adverbs of frequency"],
+ ["He ___ dinner. (hardly ever)", "hardly ever cooks", "cooks hardly ever", "hardly ever cook", "Adverbs of frequency"],
+ ["I ___ happy. (always)", "am always", "always am", "always", "Adverbs of frequency"],
+ ["She ___ films. (sometimes)", "sometimes watches", "watches sometimes", "sometimes watch", "Adverbs of frequency"],
+ ["You ___ busy. (often)", "are often", "often are", "often", "Adverbs of frequency"],
+ ["study → he ___", "studies", "studys", "studyes", "Spelling: -s, -es, -ies"],
+ ["watch → she ___", "watches", "watchs", "watchies", "Spelling: -s, -es, -ies"],
+ ["play → he ___", "plays", "plaies", "playes", "Spelling: -s, -es, -ies"],
+ ["fly → it ___", "flies", "flys", "flyes", "Spelling: -s, -es, -ies"],
+ ["kiss → she ___", "kisses", "kisss", "kissies", "Spelling: -s, -es, -ies"],
+ ["wash → he ___", "washes", "washs", "washies", "Spelling: -s, -es, -ies"],
+ ["cry → she ___", "cries", "crys", "cryes", "Spelling: -s, -es, -ies"],
+ ["say → he ___", "says", "saies", "sayes", "Spelling: -s, -es, -ies"],
+ ["fix → it ___", "fixes", "fixs", "fixies", "Spelling: -s, -es, -ies"],
+ ["try → he ___", "tries", "trys", "tryes", "Spelling: -s, -es, -ies"],
+ ["enjoy → she ___", "enjoys", "enjoies", "enjoyes", "Spelling: -s, -es, -ies"],
+ ["finish → he ___", "finishes", "finishs", "finishies", "Spelling: -s, -es, -ies"],
+ ["___ do you live? In Cluj.", "Where", "When", "Who", "Question words"],
+ ["___ do you get up? At 7.", "When", "Where", "Who", "Question words"],
+ ["___ do you go with? Mum.", "Who", "Why", "Where", "Question words"],
+ ["___ do you like it? It's fun.", "Why", "Who", "Which", "Question words"],
+ ["___ do you travel? By bus.", "How", "Who", "Why", "Question words"],
+ ["___ do you prefer, tea or juice?", "Which", "Who", "Where", "Question words"],
+ ["___ your sister play chess?", "Does", "Do", "Is", "Negatives and questions"],
+ ["My friends ___ live near me.", "don't", "doesn't", "aren't", "Negatives and questions"],
+ ["What ___ he do at weekends?", "does", "do", "is", "Negatives and questions"],
+ ["Kate ___ have lunch at home.", "doesn't", "don't", "isn't", "Negatives and questions"]]});
 const SUBJECTS=[
  {id:'english',name:'English',g:'Aa',blurb:'Grammar, words and spelling',topics:[
   {id:'irregular',name:'Irregular verbs',bl:'went, gone, taught, written',d:1,gen:irregular},
@@ -321,7 +425,8 @@ const SUBJECTS=[
   {id:'tenses',name:'Tenses',bl:'present, past, perfect, continuous',d:2,gen:tenses},
   {id:'prepositions',name:'Prepositions',bl:'good at, afraid of, wait for',d:2,gen:prepositions},
   {id:'spelling',name:'Spelling',bl:'the words everyone gets wrong',d:2,gen:spelling},
-  {id:'phrasal',name:'Phrasal verbs',bl:'give up, look into, call off',d:3,gen:phrasal}]},
+  {id:'phrasal',name:'Phrasal verbs',bl:'give up, look into, call off',d:3,gen:phrasal},
+  {id:'en-u1',name:'Unit 1',bl:'Check it! A2 · routines, free time, town',d:1,unit:'Check it! A2',gen:enUnit1}]},
  {id:'math',name:'Math',g:'+−',blurb:'Mental arithmetic, fast',topics:[
   {id:'sums',name:'Quick sums',bl:'add and subtract up to 20',d:1,gen:quickSums},
   {id:'twodigits',name:'Two digits',bl:'47 + 28, 83 − 36',d:2,gen:twoDigits},
@@ -344,7 +449,7 @@ const SUBJECTS=[
   {id:'binary',name:'Binary numbers',bl:'4-bit, both directions',d:2,gen:binary},
   {id:'python',name:'Python operators',bl:'//, %, **, len()',d:3,gen:python}]},
 ];
-const ALL=SUBJECTS.flatMap(s=>s.topics);
+const ALL=SUBJECTS.flatMap(s=>s.topics).filter(t=>!t.unit);
 SUBJECTS.push({id:'mix',name:'Mix it up',g:'✳',blurb:'Questions from every subject',topics:[
   {id:'mix-easy',name:'Easy mix',bl:'every easy topic',d:1,gen:()=>{const p=ALL.filter(t=>t.d===1);return p[ri_(0,p.length-1)].gen()}},
   {id:'mix-all',name:'Surprise me',bl:'any topic, any subject',d:2,gen:()=>ALL[ri_(0,ALL.length-1)].gen()},
@@ -395,14 +500,32 @@ function regionPicker(topic,opts){opts=opts||{};if(!topic||!topic.regions)return
   /* colours from the menu's own text colour, so chips read on light cards and dark scenes alike;
      a game can still set --eq-bg, --eq-fg, --eq-line, --eq-on-bg, --eq-on-fg itself */
   /* the chips' colours follow the background they actually sit on (nearest opaque ancestor) */
-  const tone=()=>{if(!box.isConnected)return requestAnimationFrame(tone);const cs=getComputedStyle(box),set=(k,v)=>{if(!cs.getPropertyValue(k).trim())box.style.setProperty(k,v)};
+  paint();eqTone(box);return box}
+function eqTone(box){if(!box.isConnected)return requestAnimationFrame(()=>eqTone(box));const cs=getComputedStyle(box),set=(k,v)=>{if(!cs.getPropertyValue(k).trim())box.style.setProperty(k,v)};
     let n=box.parentElement,rgb=[255,255,255];
     while(n){const c=(getComputedStyle(n).backgroundColor.match(/[\d.]+/g)||[]).map(Number);if(c.length>=3&&(c.length<4||c[3]>.5)){rgb=c;break}n=n.parentElement}
     if(!n){const c=(getComputedStyle(document.body).backgroundColor.match(/[\d.]+/g)||[]).map(Number);if(c.length>=3&&(c.length<4||c[3]>0))rgb=c}
     const light=(.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2])/255<.5; // a dark background behind the chips
     if(light){set('--eq-fg','#fff');set('--eq-bg','rgba(14,16,26,.72)');set('--eq-line','rgba(255,255,255,.28)');set('--eq-on-bg','#fff');set('--eq-on-fg','#14161f')}
-    else{set('--eq-fg','#1d2033');set('--eq-bg','#fff');set('--eq-line','rgba(20,22,40,.16)');set('--eq-on-bg','#1d2033');set('--eq-on-fg','#fff')}};
-  paint();tone();return box}
+    else{set('--eq-fg','#1d2033');set('--eq-bg','#fff');set('--eq-line','rgba(20,22,40,.16)');set('--eq-on-bg','#1d2033');set('--eq-on-fg','#fff')}}
+
+/* ---- Topics / Units: a subject with textbook units shows two tabs. The tab follows the chosen topic;
+   picking the other tab selects its first topic (onPick(id)). topicsOf(s,t) lists the topics of t's tab. ---- */
+const hasUnits=s=>!!(s&&s.topics&&s.topics.some(t=>t.unit));
+const topicsOf=(s,t)=>{if(!hasUnits(s))return s.topics;const u=!!(t&&t.unit);return s.topics.filter(x=>!!x.unit===u)};
+let tabsCss=false;
+function topicTabs(s,t,onPick){if(!hasUnits(s))return null;
+  if(!tabsCss){tabsCss=true;const st=document.createElement('style');st.textContent=`
+.eq-tabs{display:flex;gap:4px;padding:4px;margin:0 0 10px;border-radius:999px;background:var(--eq-bg);border:1.5px solid var(--eq-line);width:max-content;max-width:100%}
+.eq-tabs button{font:inherit;font-size:15px;font-weight:800;line-height:1;border:0;border-radius:999px;padding:10px 18px;cursor:pointer;background:none;color:var(--eq-fg);opacity:.75}
+.eq-tabs button[aria-selected=true]{background:var(--eq-on-bg);color:var(--eq-on-fg);opacity:1}
+.eq-tabs button:focus-visible{outline:2px solid var(--eq-on-bg);outline-offset:2px}`;document.head.append(st)}
+  const box=document.createElement('div');box.className='eq-tabs';box.setAttribute('role','tablist');box.setAttribute('aria-label','Topics or units');
+  const cur=t&&t.unit?'units':'topics';
+  [['topics','Topics'],['units','Units']].forEach(([id,name])=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','tab');
+    b.textContent=name;b.setAttribute('aria-selected',id===cur);
+    b.onclick=e=>{e.stopPropagation();if(id===cur)return;const l=s.topics.filter(x=>!!x.unit===(id==='units'));if(l.length&&onPick)onPick(l[0].id)};box.append(b)});
+  eqTone(box);return box}
 function stream(topic,level,opts){opts=opts||{};const used=new Set(),recent=[],dry=new Set();
   const regs=topic&&topic.regions?(opts.regions?parseRegions(opts.regions.join?opts.regions.join(','):opts.regions):getRegions(topic.id)):null;
   const order=[level,...[1,2,3].filter(l=>l!==level).sort((a,b)=>Math.abs(a-level)-Math.abs(b-level)||b-a)];
@@ -417,8 +540,9 @@ function stream(topic,level,opts){opts=opts||{};const used=new Set(),recent=[],d
     used.add(k);recent.push(k);if(recent.length>12)recent.shift();
   const c=String(Q.c),seen=new Set([c]);const raw=Q.w.slice(0,2);while(raw.length<2)raw.push(c);
   const w=raw.map(v=>{let x=String(v);while(seen.has(x))x=isNaN(+x)?x+'s':String(+x+1);seen.add(x);return x});
-  const ans=shuffle([c,...w]);return{q:Q.q,img:Q.img||null,code:Q.code||null,ans,correct:ans.indexOf(c),answer:c,repeat}}
+  const ans=shuffle([c,...w]);return{q:Q.q,img:Q.img||null,code:Q.code||null,tag:Q.tag||null,ans,correct:ans.indexOf(c),answer:c,repeat}}
   next.exhausted=false;next.regions=regs;return next}
 window.EduQ={SUBJECTS,SICON,SHUE,DIFFNAME,findTopic,stream,setLevel:l=>{LEVEL=l},shuffle,ri:ri_,
-  REGIONS,getRegions,setRegions,parseRegions,regionLabel,regionPicker,COUNTRY_COUNT:COUNTRIES.length};
+  REGIONS,getRegions,setRegions,parseRegions,regionLabel,regionPicker,COUNTRY_COUNT:COUNTRIES.length,
+  hasUnits,topicsOf,topicTabs};
 })();

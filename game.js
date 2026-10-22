@@ -24,7 +24,8 @@ const hexStr=c=>'#'+new THREE.Color(c).getHexString();
 const EMBED=(()=>{if(!P.get('topic'))return null;
   return{topic:P.get('topic'),level:+P.get('level')||0,laps:+P.get('laps')||0,track:P.get('track')||'',lock:P.get('lock')==='1'}})();
 const EMBED_REG=EMBED?(EduQ.parseRegions?EduQ.parseRegions(P.get('regions'))||EduQ.REGIONS.map(r=>r.id):null):null;
-const toParent=m=>{try{if(window.parent!==window)window.parent.postMessage(m,'*')}catch(e){}};
+let lastAns=null;/* the last answer rides on the next edu-progress, for the portal's mistakes report */
+const toParent=m=>{try{if(m&&m.type==='edu-progress'&&lastAns){m.last=lastAns;lastAns=null}if(window.parent!==window)window.parent.postMessage(m,'*')}catch(e){}};
 const SPECTATE=P.get('spectate')==='1';
 const RACE=!!EMBED&&!SPECTATE&&P.get('race')==='1';
 const SEED=Math.abs(parseInt(P.get('seed'),10)||0);
@@ -73,12 +74,13 @@ function logResult(r){
 /* ======================= MENUS ======================= */
 function renderSubjects(){const box=$('subjects');box.innerHTML='';
   SUBJECTS.forEach(s=>{const b=el('button','tile');b.type='button';b.style.setProperty('--h',SHUE[s.id]||'#2f80ff');
-    const tx=el('span','tx');tx.append(el('strong',null,s.name),el('span',null,`${s.topics.length} topics`));
+    const tx=el('span','tx');tx.append(el('strong',null,s.name),el('span',null,`${s.topics.filter(x=>!x.unit).length} topics`));
     const ic=el('span','sicon');ic.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${SICON[s.id]||''}</svg>`;
     b.append(ic,tx);b.onclick=()=>{if(cfg.subject!==s.id){cfg.subject=s.id;cfg.topic=s.topics[0].id}saveCfg();go('stepTopic')};box.append(b)})}
 function renderTopics(){const s=curSubject(),t=curTopic();cfg.topic=t.id;$('subName').textContent=s.name;
   const box=$('topics');box.innerHTML='';
-  s.topics.forEach(tp=>{const b=el('button','row');b.type='button';b.setAttribute('aria-pressed',tp.id===cfg.topic);
+  {const o=document.getElementById('topTabs');if(o)o.remove();const tb=EduQ.topicTabs&&EduQ.topicTabs(s,t,id=>{cfg.topic=id;saveCfg();renderTopics()});if(tb){tb.id='topTabs';box.before(tb)}}
+  (EduQ.topicsOf?EduQ.topicsOf(s,t):s.topics).forEach(tp=>{const b=el('button','row');b.type='button';b.setAttribute('aria-pressed',tp.id===cfg.topic);
     const tx=el('span','tx');tx.append(el('strong',null,tp.name),el('span',null,tp.regions&&EduQ.regionLabel?EduQ.regionLabel(EduQ.getRegions(tp.id)):tp.bl));
     const side=el('span');const bs=getBest(tp.id,topicDiff(tp));if(bs)side.append(el('span','best',`best ${bs}`));
     b.append(el('span','radio'),tx,side);b.onclick=()=>{cfg.topic=tp.id;saveCfg();renderTopics()};box.append(b)});
@@ -697,9 +699,9 @@ const nearestLane=x=>LANES.reduce((b,v,i)=>Math.abs(v-x)<Math.abs(LANES[b]-x)?i:
 
 function resolveGate(g){g.done=true;asked++;const li=nearestLane(me.lx);g.pick=li;const Q=g.Q,okk=li===Q.correct;
   if(g.set)g.set.pads.forEach((p,l)=>padDraw(p,Q.ans[l],l===Q.correct?'ok':l===li?'no':'dim'));
-  if(okk){right++;streak++;bestStreak=Math.max(bestStreak,streak);me.boostT=2.6;me.slowT=0;S.correct();S.boost();flash('#2fd47a',.16);
+  if(okk){right++;lastAns={q:Q.img?'This flag':Q.q,img:Q.img||null,answer:Q.answer,picked:Q.answer,ok:1,tag:Q.tag||null};streak++;bestStreak=Math.max(bestStreak,streak);me.boostT=2.6;me.slowT=0;S.correct();S.boost();flash('#2fd47a',.16);
     $('qres').className='good';$('qres').textContent=streak>=3?`Turbo! ${streak} in a row`:'Right! Turbo boost!'}
-  else{streak=0;me.slowT=1.6;me.boostT=0;missed.push({q:Q.img?'This flag':Q.q,img:Q.img,answer:Q.answer,picked:Q.ans[li]});S.wrong();S.skid();flash('#ff5a4a',.14);kartSmoke(me.k,10,1.6);
+  else{streak=0;me.slowT=1.6;me.boostT=0;missed.push({q:Q.img?'This flag':Q.q,img:Q.img,answer:Q.answer,picked:Q.ans[li]});lastAns=Object.assign({},missed[missed.length-1],{ok:0,tag:Q.tag||null});S.wrong();S.skid();flash('#ff5a4a',.14);kartSmoke(me.k,10,1.6);
     $('qres').className='bad';$('qres').textContent=`It's ${Q.answer}`}
   optEls.forEach((s,i)=>{s.className=i===Q.correct?'ok':i===li?'no':'dim'});
   shown=g;shownT=1.3;
