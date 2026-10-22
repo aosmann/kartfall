@@ -1,0 +1,78 @@
+{
+  "contract": 1,
+  "id": "kartfall",
+  "name": "Kartfall",
+  "pitch": "Answer right. Boost ahead.",
+  "description": "A kart race where every question is painted on the road: drive over the right answer for a turbo boost, dodge cones, hay bales and oil, grab coins and fly off the jumps. Four tracks, 2–5 laps, solo against cat bots or a live class race.",
+  "color": "#f2a516",
+  "icon": "icon-512.png",
+  "bank": "EduQ",
+  "score": "points",
+  "multiplayer": {
+    "race": true,
+    "spectate": true
+  },
+  "settings": [
+    {
+      "key": "level",
+      "label": "Difficulty",
+      "options": [
+        [
+          1,
+          "Easy"
+        ],
+        [
+          2,
+          "Medium"
+        ],
+        [
+          3,
+          "Hard"
+        ]
+      ],
+      "default": "topic"
+    },
+    {
+      "key": "laps",
+      "label": "Race length",
+      "options": [
+        [
+          2,
+          "2 laps"
+        ],
+        [
+          3,
+          "3 laps"
+        ],
+        [
+          5,
+          "5 laps"
+        ]
+      ],
+      "default": 3
+    },
+    {
+      "key": "track",
+      "label": "Track",
+      "options": [
+        [
+          "meadow",
+          "Sunny Meadow"
+        ],
+        [
+          "desert",
+          "Canyon Run"
+        ],
+        [
+          "snow",
+          "Frosty Peaks"
+        ],
+        [
+          "beach",
+          "Beach Bay"
+        ]
+      ],
+      "default": "meadow"
+    }
+  ]
+}
