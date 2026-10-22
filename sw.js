@@ -1,12 +1,13 @@
-// Kartfall: shared question bank v3 + flags/ + pinned three.js r128 for offline play; the page itself is fetched fresh when online
-const CACHE='kartfall-v5'
+// Kartfall offline cache. Code (pages, .js, .json) is network-first so updates show on the next load; heavy assets (models, sounds, flags, avatars) are cache-first.
+const CACHE='kartfall-v7'
 const FLAGS=['ad', 'ae', 'af', 'ag', 'al', 'am', 'ao', 'ar', 'at', 'au', 'az', 'ba', 'bb', 'bd', 'be', 'bf', 'bg', 'bh', 'bi', 'bj', 'bn', 'bo', 'br', 'bs', 'bt', 'bw', 'by', 'bz', 'ca', 'cd', 'cf', 'cg', 'ch', 'ci', 'cl', 'cm', 'cn', 'co', 'cr', 'cu', 'cv', 'cy', 'cz', 'de', 'dj', 'dk', 'dm', 'do', 'dz', 'ec', 'ee', 'eg', 'er', 'es', 'et', 'fi', 'fj', 'fm', 'fr', 'ga', 'gb', 'gd', 'ge', 'gh', 'gm', 'gn', 'gq', 'gr', 'gt', 'gw', 'gy', 'hn', 'hr', 'ht', 'hu', 'id', 'ie', 'il', 'in', 'iq', 'ir', 'is', 'it', 'jm', 'jo', 'jp', 'ke', 'kg', 'kh', 'ki', 'km', 'kn', 'kp', 'kr', 'kw', 'kz', 'la', 'lb', 'lc', 'li', 'lk', 'lr', 'ls', 'lt', 'lu', 'lv', 'ly', 'ma', 'mc', 'md', 'me', 'mg', 'mh', 'mk', 'ml', 'mm', 'mn', 'mr', 'mt', 'mu', 'mv', 'mw', 'mx', 'my', 'mz', 'na', 'ne', 'ng', 'ni', 'nl', 'no', 'np', 'nr', 'nz', 'om', 'pa', 'pe', 'pg', 'ph', 'pk', 'pl', 'ps', 'pt', 'pw', 'py', 'qa', 'ro', 'rs', 'ru', 'rw', 'sa', 'sb', 'sc', 'sd', 'se', 'sg', 'si', 'sk', 'sl', 'sm', 'sn', 'so', 'sr', 'ss', 'st', 'sv', 'sy', 'sz', 'td', 'tg', 'th', 'tj', 'tl', 'tm', 'tn', 'to', 'tr', 'tt', 'tv', 'tz', 'ua', 'ug', 'us', 'uy', 'uz', 'va', 'vc', 've', 'vn', 'vu', 'ws', 'ye', 'za', 'zm', 'zw'];
 const FILES=['./','index.html','questions.js','manifest.webmanifest','icon-180.png','icon-192.png','icon-512.png','game.json','three.min.js','game.js','GLTFLoader.js','RoundedBoxGeometry.js','sfx/engine.m4a','sfx/skid.m4a','sfx/impact.m4a','sfx/engine.ogg','sfx/skid.ogg','sfx/impact.ogg','kenney/decoration-forest.glb','kenney/decoration-tents.glb','kenney/Textures/colormap.png'].concat(['cool','dj','party','fancy','sassy','artist','cheeky','hungry','cosy','sleepy','angry'].map(c=>'avatars/cat-'+c+'.webp')).concat(FLAGS.map(f=>'flags/'+f+'.webp'));
-self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)));self.skipWaiting()});
+// cache:'reload' skips the browser's HTTP cache, so a new version never re-caches an old file
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES.map(f=>new Request(f,{cache:'reload'})))));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n!==CACHE).map(n=>caches.delete(n)))));self.clients.claim()});
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;
-  const page=r.mode==='navigate'||r.url.endsWith('/index.html')||r.url.endsWith('/');
-  if(page){e.respondWith(fetch(r).then(res=>{const c=res.clone();caches.open(CACHE).then(x=>x.put(r,c));return res}).catch(()=>caches.match(r,{ignoreSearch:true}).then(h=>h||caches.match('index.html'))));return}
+  const u=new URL(r.url);const code=u.origin===self.location.origin&&(r.mode==='navigate'||/\/$|\.(html|js|json)$/.test(u.pathname));
+  if(code){e.respondWith((r.mode==='navigate'?fetch(r):fetch(r.url,{cache:'no-cache',credentials:'same-origin'})).then(res=>{const c=res.clone();caches.open(CACHE).then(x=>x.put(r,c));return res}).catch(()=>caches.match(r,{ignoreSearch:true}).then(h=>h||caches.match('index.html'))));return}
   e.respondWith(caches.match(r).then(hit=>hit||fetch(r).then(res=>{
     if(res.ok&&(r.url.startsWith(self.location.origin)||r.url.includes('fonts.g'))){const c=res.clone();caches.open(CACHE).then(x=>x.put(r,c))}
     return res})))});

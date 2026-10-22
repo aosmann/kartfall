@@ -81,6 +81,14 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
 
 /* ---------- Dash ---------- */
 #dash{bottom:0;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:flex-end;transition:opacity .4s,visibility .4s}
+#dashL{display:grid;justify-items:center;gap:8px}
+#dashBtn{pointer-events:auto;width:96px;height:62px;border:0;border-radius:20px;cursor:pointer;background:linear-gradient(#ffd84d,#ffb300);color:var(--navy);
+  font:800 20px/1 var(--f);letter-spacing:.04em;box-shadow:0 5px 0 #b77d00,0 8px 20px rgba(0,0,0,.3);display:grid;place-items:center;transition:transform .1s,opacity .2s,filter .2s;touch-action:none}
+#dashBtn small{display:block;font:700 10px/1 var(--f);letter-spacing:.12em;opacity:.75;margin-top:2px}
+#dashBtn:active,#dashBtn.on{transform:translateY(4px);box-shadow:0 1px 0 #b77d00,0 4px 12px rgba(0,0,0,.3)}
+#dashBtn.on{background:linear-gradient(#7ff6ff,#2fc4ff);animation:pulse .5s ease-in-out infinite alternate}
+#dashBtn:disabled{opacity:.38;filter:grayscale(1);cursor:default}
+@keyframes pulse{to{filter:brightness(1.15)}}
 #gauge{position:relative;width:104px;height:92px}
 #gauge svg{position:absolute;inset:0;width:104px;height:104px;overflow:visible}
 #gauge .bg{fill:var(--glass);stroke:var(--line);stroke-width:2}
@@ -255,7 +263,7 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
 .step.s3 .blk{height:clamp(80px,11vh,140px);background:#f0a35e}
 @media (max-aspect-ratio:1/1){#spec{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}#rankBox{grid-column:1;grid-row:3;max-height:42vh;border-left:0;border-top:3px solid rgba(255,255,255,.12)}}
 @media (max-width:380px){#posBig{font-size:46px}#mini{width:92px;height:92px}#qbox{top:calc(110px + env(safe-area-inset-top,0px))}}
-@media (max-height:500px){#qbox{top:calc(8px + env(safe-area-inset-top,0px));left:130px;right:170px}#mini{width:88px;height:88px}#qtext{font-size:24px;padding:5px 14px 3px}#opts span{padding:6px 4px 4px;font-size:15px}#qimg{height:40px}}
+@media (max-height:500px){#dashBtn{width:84px;height:50px;font-size:17px}#qbox{top:calc(8px + env(safe-area-inset-top,0px));left:130px;right:170px}#mini{width:88px;height:88px}#qtext{font-size:24px;padding:5px 14px 3px}#opts span{padding:6px 4px 4px;font-size:15px}#qimg{height:40px}}
 @media (prefers-reduced-motion:reduce){#count.tick,#speedfx.on,.flagi,#finishFx .flag{animation:none!important}*{transition-duration:.01s!important}}
 </style>
 </head>
@@ -283,7 +291,8 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
   <div id="qres"></div>
 </div>
 <div id="dash" class="ui off">
-  <div id="gauge" aria-hidden="true"><svg viewBox="0 0 104 104"><circle class="bg" cx="52" cy="52" r="50"/><path class="trk" d="M19.1 71A38 38 0 1 1 84.9 71" pathLength="100"/><path id="gArc" class="val" d="M19.1 71A38 38 0 1 1 84.9 71" pathLength="100" stroke-dasharray="0 100"/></svg><b id="spd">0</b><small>KM/H</small></div>
+  <div id="dashL"><button type="button" id="dashBtn" aria-label="Turbo to the answers" disabled>⚡ TURBO<small>I KNOW IT!</small></button>
+<div id="gauge" aria-hidden="true"><svg viewBox="0 0 104 104"><circle class="bg" cx="52" cy="52" r="50"/><path class="trk" d="M19.1 71A38 38 0 1 1 84.9 71" pathLength="100"/><path id="gArc" class="val" d="M19.1 71A38 38 0 1 1 84.9 71" pathLength="100" stroke-dasharray="0 100"/></svg><b id="spd">0</b><small>KM/H</small></div></div>
   <div id="dashR"><div class="hchip" id="coinChip"><i></i><span id="coinN">0</span></div><div class="hchip" id="timeChip">0:00.0</div></div>
 </div>
 <div id="speedfx"></div>
@@ -395,6 +404,9 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
 <script src="RoundedBoxGeometry.js"></script>
 <script src="questions.js"></script>
 <script src="game.js"></script>
-<script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
+<script>/* service worker: when a new version takes over right after load, reload once so the new code runs now (never mid-race) */
+if('serviceWorker' in navigator){const t0=Date.now(),had=!!navigator.serviceWorker.controller;let done=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!done&&Date.now()-t0<6000){done=true;location.reload()}});
+  addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).catch(()=>{}))}</script>
 </body>
 </html>
