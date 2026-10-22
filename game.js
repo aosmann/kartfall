@@ -577,13 +577,10 @@ const coinMesh=new THREE.InstancedMesh(coinGeo,new THREE.MeshLambertMaterial({co
 const GRID=[[-4,0],[-4,2],[-10,1],[-16,0],[-16,2],[-22,1]];
 let D=1,layout={gates:[],obs:[],coins:[]};
 function genLayout(seed,laps){const r=rng(seed*31+laps*977+TRACK.id.length*131+5);D=laps*TL;const gates=[],obs=[],coins=[];
-  let s=95;while(s<D-70){if(nearJump(s,40,30)){s+=12;continue}gates.push({s,Q:null,done:false,set:null,pick:-1});s+=125+r()*30}
-  const marks=[0,...gates.map(g=>g.s),D-25];const special=THEMES[TRACK.id].obst;
-  // one obstacle per gap, early in it (just after the previous pads), so the run-up to every question stays clear for reading
+  let s=95;while(s<D-70){if(nearJump(s,40,30)){s+=12;continue}gates.push({s,Q:null,done:false,set:null,pick:-1});s+=215+r()*30}
+  const marks=[0,...gates.map(g=>g.s),D-25];
+  // no obstacles: the whole stretch between questions is free, so kids can focus on the question
   for(let k=0;k<marks.length-1;k++){const b=marks[k+1]-30;
-    if(k>0){let p=marks[k]+28+r()*10;while(p<b&&nearJump(p,20,22))p+=10;
-      if(p<Math.min(b,marks[k]+(marks[k+1]-marks[k])*.45)){const lane=r()*3|0,u=r();
-        const type=u<.25?'cones':u<.45?'tyres':u<.65?(TRACK.id==='snow'?'ice':'oil'):special;obs.push({s:p,lane,type,obj:null,hit:false})}}
     // a row of coins in a free lane
     const cs=marks[k]+(k===0?30:20),ce=Math.min(b,cs+40);if(ce-cs>12){const lane=r()*3|0;for(let c=cs;c<ce;c+=4.2){if(obs.some(o=>o.lane===lane&&Math.abs(o.s-c)<6)||nearJump(c,4,6))continue;coins.push({s:c,lane,got:false})}}}
   return{gates,obs,coins}}
@@ -735,9 +732,10 @@ function endRace(cause){
 
 /* ---------- input: swipe / drag on touch, arrows or A-D ---------- */
 function move(d){if(state!=='run')return;const n=clamp(me.lane+d,0,2);if(n!==me.lane){me.lane=n;S.lane()}}
-let pid=null,ax=0;
-addEventListener('pointerdown',e=>{if(state!=='run'||e.target.closest('button,#sheet'))return;pid=e.pointerId;ax=e.clientX});
-addEventListener('pointermove',e=>{if(e.pointerId!==pid)return;const dx=e.clientX-ax,th=Math.max(26,Math.min(60,W()*.08));if(Math.abs(dx)>th){move(dx>0?1:-1);ax=e.clientX}});
+let pid=null,ax=0,swiped=false;
+addEventListener('pointerdown',e=>{if(state!=='run'||e.target.closest('button,#sheet'))return;pid=e.pointerId;ax=e.clientX;swiped=false});
+// one lane per swipe: a long swipe still moves only one lane; lift the finger to swipe again
+addEventListener('pointermove',e=>{if(e.pointerId!==pid||swiped)return;const dx=e.clientX-ax,th=Math.max(26,Math.min(60,W()*.08));if(Math.abs(dx)>th){move(dx>0?1:-1);swiped=true}});
 addEventListener('pointerup',e=>{if(e.pointerId===pid)pid=null});addEventListener('pointercancel',()=>pid=null);
 addEventListener('keydown',e=>{if(e.repeat&&!/Arrow/.test(e.code))return;
   if(e.code==='Escape'||e.code==='KeyP'){if(state==='paused')resume();else pause();return}
@@ -817,7 +815,7 @@ function placeSpecTags(){const w=W(),h=H();
 const clock=new THREE.Clock();let t=0,stateTick=0,camSnap=true;
 const camF=new THREE.Vector3(0,0,-1),camLook=new THREE.Vector3();
 function updateProps(){
-  const lo=me.dist-16,hi=me.dist+240;const G=layout.gates,O=layout.obs,Cn=layout.coins;
+  const lo=me.dist-16,hi=me.dist+320;const G=layout.gates,O=layout.obs,Cn=layout.coins;
   while(gLo<G.length&&G[gLo].s<lo){const g=G[gLo];if(g.set){g.set.used=false;g.set.g.visible=false;g.set=null}gLo++}
   for(let i=gLo;i<G.length&&G[i].s<hi;i++){const g=G[i];if(!g.set){const a=padSets.find(x=>!x.used);if(!a)break;a.used=true;g.set=a;if(!g.Q)g.Q=qNext();
       placePads(a,g.s);a.pads.forEach(p=>padDraw(p,g.Q.ans[p.l]))}}
@@ -887,7 +885,7 @@ function frame(){
   if(state==='run'){
     if(shown&&shown.done){shownT-=dt;if(shownT<=0)shown=null}
     if(!shown||!shown.done){const G=layout.gates;let g=null;for(let i=gLo;i<G.length;i++)if(!G[i].done){g=G[i];break}
-      if(g&&g.Q&&g!==shown&&g.s-me.dist<200){shown=g;showQuestion(g)}else if(!g&&shown!==null){show('qbox',false);shown=null}}
+      if(g&&g.Q&&g!==shown&&g.s-me.dist<300){shown=g;showQuestion(g)}else if(!g&&shown!==null){show('qbox',false);shown=null}}
     if(shown&&!shown.done){const li=nearestLane(me.lx);optEls.forEach((s,i)=>s.classList.toggle('sel',i===li))}
     if(!shown)show('qbox',false)}
   padSets.forEach(a=>{if(a.g.visible)a.qs.forEach((q,i)=>q.position.y+=Math.sin(t*3+i)*.004)});
