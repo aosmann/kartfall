@@ -54,7 +54,7 @@ const trackById=id=>TRACKS.find(t=>t.id===id)||TRACKS[0];
 const LAP_OPTS=[2,3,5];
 const cfg={subject:'math',topic:'times',diffs:{},laps:3,track:'meadow',cam:'chase'};
 try{const s=JSON.parse(localStorage.getItem('kartfall-cfg2')||'{}');Object.assign(cfg,s);if(!cfg.diffs)cfg.diffs={}}catch(e){}
-if(!LAP_OPTS.includes(+cfg.laps))cfg.laps=3;cfg.laps=+cfg.laps;cfg.track=trackById(cfg.track).id;if(cfg.cam!=='cockpit')cfg.cam='chase';
+cfg.laps=+cfg.laps;if(!LAP_OPTS.includes(cfg.laps)){if(cfg.lcustom&&cfg.laps>=1&&cfg.laps<=9)cfg.laps=Math.round(cfg.laps);else{cfg.laps=3;cfg.lcustom=false}}cfg.track=trackById(cfg.track).id;if(cfg.cam!=='cockpit')cfg.cam='chase';
 const saveCfg=()=>{if(EMBED)return;try{localStorage.setItem('kartfall-cfg2',JSON.stringify(cfg))}catch(e){}};
 const saveCam=()=>{try{const s=JSON.parse(localStorage.getItem('kartfall-cfg2')||'{}');s.cam=cfg.cam;localStorage.setItem('kartfall-cfg2',JSON.stringify(s))}catch(e){}};
 const curSubject=()=>SUBJECTS.find(s=>s.id===cfg.subject)||SUBJECTS[0];
@@ -87,7 +87,7 @@ function renderTopics(){const s=curSubject(),t=curTopic();cfg.topic=t.id;$('subN
   {const old=document.getElementById('regPick');if(old)old.remove();const pk=EduQ.regionPicker&&EduQ.regionPicker(t,{onChange:renderTopics});if(pk){pk.id='regPick';box.after(pk)}}
   document.querySelectorAll('#diffSeg button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.d===DIFF()))}
 document.querySelectorAll('#diffSeg button').forEach(b=>b.onclick=()=>{cfg.diffs[curTopic().id]=+b.dataset.d;saveCfg();renderTopics()});
-document.querySelectorAll('#lapSeg button').forEach(b=>b.onclick=()=>{cfg.laps=+b.dataset.l;saveCfg();renderTrackStep()});
+document.querySelectorAll('#lapSeg button').forEach(b=>b.onclick=()=>{if(b.dataset.l==='custom'){cfg.lcustom=true;cfg.laps=clamp(+cfg.claps||4,1,9)}else{cfg.lcustom=false;cfg.laps=+b.dataset.l}saveCfg();renderTrackStep()});
 function trackThumb(tr){const c=document.createElement('canvas');c.width=320;c.height=240;const x=c.getContext('2d'),th=THEMES[tr.id];
   const g=x.createLinearGradient(0,0,0,240);g.addColorStop(0,hexStr(th.sky[1]));g.addColorStop(1,th.ground?th.ground[0]:'#3fb3e0');x.fillStyle=g;x.fillRect(0,0,320,240);
   if(!th.ground){x.fillStyle='#45bde6';x.fillRect(0,0,320,240)}
@@ -104,7 +104,8 @@ function renderTrackStep(){const box=$('trackList');box.innerHTML='';
   TRACKS.forEach(tr=>{const b=el('button','trk');b.type='button';b.setAttribute('aria-pressed',tr.id===cfg.track);
     b.append(trackThumb(tr),el('strong',null,tr.name),el('span',null,tr.sub));
     b.onclick=()=>{cfg.track=tr.id;saveCfg();if(TRACK.id!==tr.id){TRACK=tr;rebuildWorld()}renderTrackStep()};box.append(b)});
-  document.querySelectorAll('#lapSeg button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.l===cfg.laps));
+  document.querySelectorAll('#lapSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l==='custom'?!!cfg.lcustom:(!cfg.lcustom&&+b.dataset.l===cfg.laps)));
+  {const o=document.getElementById('customLaps');if(o)o.remove();if(cfg.lcustom&&EduQ.customRow){const row=EduQ.customRow([{key:'l',label:'Laps',min:1,max:9,step:1}],{l:cfg.laps},v=>{cfg.laps=cfg.claps=clamp(v.l,1,9);saveCfg();renderTrackStep()});row.id='customLaps';$('lapSeg').parentElement.after(row)}}
   $('startBtn').textContent=`Start · ${curTopic().name}`}
 const SCREENS=['scrHome','stepSubj','stepTopic','stepTrack'];
 function go(id){SCREENS.forEach(x=>$(x).hidden=x!==id);$('sheet').classList.toggle('peek',id==='scrHome');

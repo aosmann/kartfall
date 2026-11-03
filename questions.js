@@ -1,4 +1,4 @@
-/* EduQ v4 — v4: textbook units (topic.unit = book; Topics / Units tabs via EduQ.topicTabs + topicsOf; units stay out of Mix).
+/* EduQ v4.1 — v4.1: EduQ.customRow (steppers for custom settings). v4: textbook units (topic.unit = book; Topics / Units tabs via EduQ.topicTabs + topicsOf; units stay out of Mix).
    EduQ v3 — shared question bank for the educational games portal (Lanefall, Stackfall, Slicefall, …).
    Extracted from Lanefall v10. v2: no repeats inside a run (a level that runs dry borrows from the topic's other
    levels; only when the whole topic is used up does next() repeat, flagged with Q.repeat and next.exhausted),
@@ -579,6 +579,34 @@ function eqTone(box){if(!box.isConnected)return requestAnimationFrame(()=>eqTone
     if(light){set('--eq-fg','#fff');set('--eq-bg','rgba(14,16,26,.72)');set('--eq-line','rgba(255,255,255,.28)');set('--eq-on-bg','#fff');set('--eq-on-fg','#14161f')}
     else{set('--eq-fg','#1d2033');set('--eq-bg','#fff');set('--eq-line','rgba(20,22,40,.16)');set('--eq-on-bg','#1d2033');set('--eq-on-fg','#fff')}}
 
+/* ---- custom settings: a row of steppers (and small choices) for a game's own menu, e.g. a custom clock.
+   fields: [{key,label,unit,min,max,step} | {key,label,options:[[value,label],…]}]; onChange(newValues) ---- */
+let custCss=false;
+function customRow(fields,values,onChange){
+  if(!custCss){custCss=true;const st=document.createElement('style');st.textContent=`
+.eq-cust{display:flex;flex-wrap:wrap;gap:10px 14px;margin:10px 0 2px}
+.eq-cust .eq-f{display:grid;gap:5px;min-width:0}
+.eq-cust .eq-l{font-size:12px;font-weight:800;letter-spacing:.02em;color:var(--eq-fg);opacity:.75}
+.eq-step,.eq-opt{display:flex;align-items:center;gap:2px;border-radius:999px;background:var(--eq-bg);border:1.5px solid var(--eq-line);color:var(--eq-fg);padding:3px;width:max-content}
+.eq-step button{width:40px;height:40px;border:0;border-radius:999px;background:none;color:inherit;font:inherit;font-size:22px;font-weight:900;line-height:1;cursor:pointer}
+.eq-step button:disabled{opacity:.3;cursor:default}
+.eq-step output{min-width:4.2em;text-align:center;font-weight:900;font-size:16px;font-variant-numeric:tabular-nums}
+.eq-opt button{border:0;border-radius:999px;padding:10px 14px;background:none;color:inherit;font:inherit;font-size:14px;font-weight:800;cursor:pointer;opacity:.75}
+.eq-opt button[aria-pressed=true]{background:var(--eq-on-bg);color:var(--eq-on-fg);opacity:1}
+.eq-cust button:focus-visible{outline:2px solid var(--eq-on-bg);outline-offset:2px}`;document.head.append(st)}
+  const box=document.createElement('div');box.className='eq-cust';const v=Object.assign({},values);
+  const set=(k,x)=>{v[k]=x;onChange&&onChange(Object.assign({},v))};
+  fields.forEach(f=>{const w=document.createElement('div');w.className='eq-f';const l=document.createElement('span');l.className='eq-l';l.textContent=f.label;w.append(l);
+    if(f.options){const o=document.createElement('div');o.className='eq-opt';o.setAttribute('role','group');o.setAttribute('aria-label',f.label);
+      f.options.forEach(([val,name])=>{const b=document.createElement('button');b.type='button';b.textContent=name;b.setAttribute('aria-pressed',v[f.key]===val);
+        b.onclick=e=>{e.stopPropagation();set(f.key,val)};o.append(b)});w.append(o)}
+    else{const st=f.step||1,cl=x=>Math.min(f.max,Math.max(f.min,Math.round(x/st)*st));let cur=cl(+v[f.key]||f.min);
+      const r=document.createElement('div');r.className='eq-step';r.setAttribute('role','group');r.setAttribute('aria-label',f.label);
+      const out=document.createElement('output');const txt=()=>{out.textContent=(f.prefix||'')+cur+(f.unit?' '+f.unit:'');mi.disabled=cur<=f.min;pl.disabled=cur>=f.max};
+      const mk=(t,d,lab)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.setAttribute('aria-label',lab);b.onclick=e=>{e.stopPropagation();const n=cl(cur+d);if(n!==cur){cur=n;txt();set(f.key,cur)}};return b};
+      const mi=mk('−',-st,'Less'),pl=mk('+',st,'More');r.append(mi,out,pl);txt();w.append(r)}
+    box.append(w)});
+  eqTone(box);return box}
 /* ---- Topics / Units: a subject with textbook units shows two tabs. The tab follows the chosen topic;
    picking the other tab selects its first topic (onPick(id)). topicsOf(s,t) lists the topics of t's tab. ---- */
 const hasUnits=s=>!!(s&&s.topics&&s.topics.some(t=>t.unit));
@@ -614,5 +642,5 @@ function stream(topic,level,opts){opts=opts||{};const used=new Set(),recent=[],d
   next.exhausted=false;next.regions=regs;return next}
 window.EduQ={SUBJECTS,SICON,SHUE,DIFFNAME,findTopic,stream,setLevel:l=>{LEVEL=l},shuffle,ri:ri_,
   REGIONS,getRegions,setRegions,parseRegions,regionLabel,regionPicker,COUNTRY_COUNT:COUNTRIES.length,
-  hasUnits,topicsOf,topicTabs};
+  hasUnits,topicsOf,topicTabs,customRow};
 })();

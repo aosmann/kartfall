@@ -11,7 +11,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<style>html{color-scheme:dark}body{margin:0;font:14px/1.4 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>html{color-scheme:dark}body{margin:0;font:14px/1.4 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}#lapSeg{grid-template-columns:repeat(4,minmax(0,1fr))}
+</style>
 <title>Kartfall</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap">
@@ -361,7 +362,7 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
       <div class="tracks" id="trackList"></div>
       <div class="footer">
         <div class="setrow"><span>Laps</span><div class="seg3" id="lapSeg" role="group" aria-label="Laps">
-          <button type="button" data-l="2">2 laps</button><button type="button" data-l="3">3 laps</button><button type="button" data-l="5">5 laps</button></div></div>
+          <button type="button" data-l="2">2 laps</button><button type="button" data-l="3">3 laps</button><button type="button" data-l="5">5 laps</button><button type="button" data-l="custom">Custom</button></div></div>
         <button type="button" class="cta" id="startBtn">Start race</button>
       </div>
     </section>
