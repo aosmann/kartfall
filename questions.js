@@ -1,4 +1,7 @@
-/* EduQ v5 — v5: Romanian (EduQ.setLang('ro')): questions for every subject except English, subject and topic names, continents, levels.
+/* EduQ v5.1 — v5.1: topic settings (topic.opts, read from ?o_<key>= in the game's address: Quick sums range and
+   operations, Times tables pick the tables) and teacher question sets (?qset= carries the set; it shows up as the
+   subject 'My questions', outside Mix).
+   EduQ v5 — v5: Romanian (EduQ.setLang('ro')): questions for every subject except English, subject and topic names, continents, levels.
    EduQ v4.1 — v4.1: EduQ.customRow (steppers for custom settings). v4: textbook units (topic.unit = book; Topics / Units tabs via EduQ.topicTabs + topicsOf; units stay out of Mix).
    EduQ v3 — shared question bank for the educational games portal (Lanefall, Stackfall, Slicefall, …).
    Extracted from Lanefall v10. v2: no repeats inside a run (a level that runs dry borrows from the topic's other
@@ -9,6 +12,8 @@
    Usage: EduQ.setLevel(1|2|3); const Q = topic.gen();  */
 (function(){
 let LEVEL=1;const LV=()=>LEVEL;
+const URLP=(()=>{try{return new URLSearchParams(location.search)}catch(e){return new URLSearchParams('')}})();
+const TOPT={};URLP.forEach((v,k)=>{if(k.slice(0,2)==='o_')TOPT[k.slice(2)]=v});
 const ri_=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 
@@ -147,13 +152,30 @@ const phrasal=fixedL({1:[
  ["To TURN OUT to be means to…","prove to be","refuse to be","leave"],["To SEE THROUGH a lie means to…","recognise it","believe it","tell it"]]});
 
 /* ---- Math ---- */
-const quickSums=()=>{const m=[10,20,50][LV()-1];return Math.random()<.5?(()=>{const a=ri_(1,m-2),b=ri_(1,m-a);return num(`${a} + ${b}`,a+b,[-2,-1,1,2,3])})()
-  :(()=>{const a=ri_(4,m),b=ri_(1,a-1);return num(`${a} − ${b}`,a-b,[-2,-1,1,2,3])})()};
+/* Basic math: the teacher picks the operations (o_ops: any of + - x d) and how big the numbers get (o_max).
+   + and −: numbers and answers up to max, never below zero. × : the answer is at most max. ÷ : the number divided is at most max, always exact. */
+const basicMath=()=>{const L=LV(),m=Math.max(4,Math.min(1000000,Math.round(+TOPT.max)||[20,100,1000][L-1]));
+  let ops=String(TOPT.ops||'+-xd').replace(/[^+\-xd]/g,'');if(!ops)ops='+-xd';const op=ops[ri_(0,ops.length-1)];
+  const d=m>=1000?[-100,100,-10,10,-1,1]:m>=100?[-10,10,-1,1,2]:[-2,-1,1,2,3];
+  if(op==='+'){const a=ri_(1,m-1),b=ri_(1,m-a);return num(`${a} + ${b}`,a+b,d)}
+  if(op==='-'){const a=ri_(Math.min(4,m),m),b=ri_(1,a-1);return num(`${a} − ${b}`,a-b,d)}
+  const top=Math.max(2,Math.floor(Math.sqrt(m))),big=Math.min(m>=100?12:10,Math.floor(m/2)),a=ri_(2,Math.max(2,Math.min(big,m>=144?12:top+2))),bMax=Math.max(1,Math.floor(m/a)),b=ri_(Math.min(2,bMax),bMax);
+  if(op==='x'){const[x,y]=Math.random()<.5?[a,b]:[b,a];return num(`${x} × ${y}`,a*b,[-a,a,-b,b,1,-1])}
+  return num(`${a*b} ÷ ${a}`,b,[-1,1,2,-2])};
+/* Quick sums: by level (10 / 20 / 50) unless the teacher set o_max (numbers up to) and o_ops (+, -, +-) */
+const quickSums=()=>{const m=Math.max(4,Math.min(1000000,Math.round(+TOPT.max)||[10,20,50][LV()-1])),ops=/^[+-]+$/.test(TOPT.ops||'')?TOPT.ops:'+-';
+  const d=m>=1000?[-100,100,-10,10,-1,1]:m>=100?[-10,10,-1,1,2]:[-2,-1,1,2,3],op=ops.length>1?(Math.random()<.5?'+':'-'):ops;
+  if(op==='+'){const a=ri_(1,m-1),b=ri_(1,m-a);return num(`${a} + ${b}`,a+b,d)}
+  const a=ri_(Math.min(4,m),m),b=ri_(1,a-1);return num(`${a} − ${b}`,a-b,d)};
 const twoDigits=()=>{const L=LV(),[A,B]=[[[11,39],[10,29]],[[18,69],[12,29]],[[120,480],[45,299]]][L-1];
   return Math.random()<.5?(()=>{const a=ri_(...A),b=ri_(...B);return num(`${a} + ${b}`,a+b,[-10,10,-1,1])})()
   :(()=>{const b=ri_(...B),a=b+ri_(5,A[1]);return num(`${a} − ${b}`,a-b,[-10,10,-1,1])})()};
 // Easy: 2–5 × 1–10. Medium: 2–10, one factor usually 6–9 (no more 2×2 on Medium). Hard: 3–12, one factor 6–12.
 const times=()=>{const L=LV();let a,b;
+  const T=String(TOPT.tables||'').split(',').map(Number).filter(n=>n>=1&&n<=20),ops=TOPT.ops||'x';
+  if(T.length||ops!=='x'){a=T.length?T[ri_(0,T.length-1)]:ri_(2,L===1?5:L===2?10:12);b=ri_(L===3?2:1,L===3?12:10);
+    if(ops.includes('d')&&(ops==='d'||Math.random()<.5))return num(`${a*b} ÷ ${a}`,b,[-1,1,2,-2]);
+    if(Math.random()<.5)[a,b]=[b,a];return num(`${a} × ${b}`,a*b,[-a,a,-b,b,1,-1])}
   if(L===1){a=ri_(2,5);b=ri_(1,10)}
   else if(L===2){a=Math.random()<.8?ri_(6,9):ri_(3,10);b=ri_(2,10)}
   else{a=ri_(6,12);b=ri_(2,12)}
@@ -587,9 +609,16 @@ const SUBJECTS=[
   {id:'en-u1',name:'A2 · Unit 1',bl:'Check it! A2 · routines, free time, town',d:1,unit:'Check it! A2',gen:enUnit1},
   {id:'en-b2u2',name:'B2+ · Unit 2',bl:'Check it! B2+ · modals, cars and the road, take/make/do',d:2,unit:'Check it! B2+',gen:enUnit2}]},
  {id:'math',name:'Math',g:'+−',blurb:'Mental arithmetic, fast',topics:[
-  {id:'sums',name:'Quick sums',bl:'add and subtract up to 20',d:1,gen:quickSums},
+  {id:'basic',name:'Basic math',bl:'pick + − × ÷ and how big the numbers get',d:1,gen:basicMath,opts:[
+    {key:'ops',label:'Operations',multi:true,options:[['+','+'],['-','−'],['x','×'],['d','÷']],def:'+-xd'},
+    {key:'max',label:'Numbers up to',options:[['','By level'],['10','10'],['20','20'],['100','100'],['1000','1000']],custom:{min:5,max:1000000}}]},
+  {id:'sums',name:'Quick sums',bl:'add and subtract up to 20',d:1,gen:quickSums,opts:[
+    {key:'max',label:'Numbers up to',options:[['','By level'],['10','10'],['20','20'],['100','100'],['1000','1000']],custom:{min:5,max:1000000}},
+    {key:'ops',label:'Operations',options:[['+-','+ and −'],['+','+ only'],['-','− only']]}]},
   {id:'twodigits',name:'Two digits',bl:'47 + 28, 83 − 36',d:2,gen:twoDigits},
-  {id:'times',name:'Times tables',bl:'2× up to 12×',d:2,gen:times},
+  {id:'times',name:'Times tables',bl:'2× up to 12×',d:2,gen:times,opts:[
+    {key:'tables',label:'Tables',multi:true,options:[['2','×2'],['3','×3'],['4','×4'],['5','×5'],['6','×6'],['7','×7'],['8','×8'],['9','×9'],['10','×10'],['11','×11'],['12','×12']]},
+    {key:'ops',label:'Operations',options:[['x','× multiply'],['d','÷ divide'],['xd','both']]}]},
   {id:'division',name:'Division',bl:'tables in reverse',d:2,gen:division},
   {id:'percent',name:'Percentages',bl:'10%, 25%, 75% of a number',d:3,gen:ro('percent',percent)},
   {id:'negatives',name:'Negative numbers',bl:'below zero and back',d:3,gen:negatives},
@@ -609,6 +638,12 @@ const SUBJECTS=[
   {id:'python',name:'Python operators',bl:'//, %, **, len()',d:3,gen:python}]},
 ];
 const ALL=SUBJECTS.flatMap(s=>s.topics).filter(t=>!t.unit);
+/* a teacher's question set, carried in ?qset= (base64url JSON {id, n: name, q: [[question, right, wrong, wrong, wrong?, image?], …]}) */
+const QSET=(()=>{const raw=URLP.get('qset');if(!raw)return null;
+  try{const b=atob(raw.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((raw.length+3)%4)),t=decodeURIComponent(escape(b)),d=JSON.parse(t);
+    const q=(d&&Array.isArray(d.q)?d.q:[]).filter(r=>Array.isArray(r)&&r[0]&&r[1]&&r.slice(2,5).filter(Boolean).length>=1);return q.length?{id:String(d.id||'myset'),n:String(d.n||'My questions'),q}:null}catch(e){return null}})();
+if(QSET)SUBJECTS.push({id:'mine',name:'My questions',g:'★',blurb:'Questions made by your teacher',topics:[{id:QSET.id,name:QSET.n,bl:QSET.q.length+' questions',d:2,own:true,
+  gen:()=>{const r=QSET.q[ri_(0,QSET.q.length-1)],w=shuffle(r.slice(2,5).filter(Boolean).map(String));return{q:String(r[0]),c:String(r[1]),w:w.slice(0,2),img:r[5]||null}}}]});
 SUBJECTS.push({id:'mix',name:'Mix it up',g:'✳',blurb:'Questions from every subject',topics:[
   {id:'mix-easy',name:'Easy mix',bl:'every easy topic',d:1,gen:()=>{const p=ALL.filter(t=>t.d===1);return p[ri_(0,p.length-1)].gen()}},
   {id:'mix-all',name:'Surprise me',bl:'any topic, any subject',d:2,gen:()=>ALL[ri_(0,ALL.length-1)].gen()},
@@ -620,8 +655,9 @@ const SICON={
  geo:'<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 3.8 5.2 3.8 8.5s-1.2 6.1-3.8 8.5c-2.6-2.4-3.8-5.2-3.8-8.5S9.4 5.9 12 3.5z"/>',
  science:'<path d="M9.2 3.5h5.6M10.4 3.5v5.4L4.9 18.3a1.5 1.5 0 0 0 1.3 2.2h11.6a1.5 1.5 0 0 0 1.3-2.2l-5.5-9.4V3.5"/><path d="M7.6 14h8.8"/>',
  info:'<path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5M13.6 4.5l-3.2 15"/>',
+ mine:'<path d="M12 3.6l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/>',
  mix:'<path d="M3.5 7h3c4.8 0 6.2 10 11 10h3M17.6 14.4l3 2.6-3 2.6M3.5 17h3c1.6 0 2.8-1.1 3.8-2.7M13.7 9.7c1-1.6 2.2-2.7 3.8-2.7h3M17.6 4.4l3 2.6-3 2.6"/>'};
-const SHUE={english:'#ff7a5c',math:'#f2c46d',geo:'#5fd39a',science:'#6cb8ff',info:'#b48cff',mix:'#ff7ac6'};
+const SHUE={english:'#ff7a5c',math:'#f2c46d',geo:'#5fd39a',science:'#6cb8ff',info:'#b48cff',mine:'#ffb347',mix:'#ff7ac6'};
 const DIFFNAME=['','Easy','Medium','Hard'];
 const findTopic=(sid,tid)=>{const s=SUBJECTS.find(x=>x.id===sid)||SUBJECTS[0];return{subject:s,topic:s.topics.find(t=>t.id===tid)||s.topics[0]}};
 /* Build a stream of questions with no repeats inside a sliding window; answers shuffled, wrongs made unique */
@@ -733,7 +769,7 @@ function stream(topic,level,opts){opts=opts||{};const used=new Set(),recent=[],d
 /* language for questions and names: 'en' (default) or 'ro'. English topics stay English. */
 const NAMES_RO={English:'Engleză','Grammar, words and spelling':'Gramatică, vocabular și ortografie','Irregular verbs':'Verbe neregulate',Opposites:'Antonime',Tenses:'Timpuri verbale',Prepositions:'Prepoziții',Spelling:'Ortografie','Phrasal verbs':'Verbe frazale',
  'the words everyone gets wrong':'cuvintele pe care le greșește toată lumea','present, past, perfect, continuous':'prezent, trecut, perfect, continuu','hot and cold, win and lose':'hot și cold, win și lose',
- Math:'Matematică','Mental arithmetic, fast':'Calcul mintal, rapid','Quick sums':'Adunări rapide','add and subtract up to 20':'adunări și scăderi până la 20','Two digits':'Numere de două cifre','Times tables':'Tabla înmulțirii','2× up to 12×':'de la 2× la 12×',
+ 'My questions':'Întrebările mele','Questions made by your teacher':'Întrebări făcute de profesorul tău', Math:'Matematică','Mental arithmetic, fast':'Calcul mintal, rapid','Quick sums':'Adunări rapide','Basic math':'Calcul de bază','pick + − × ÷ and how big the numbers get':'alegi + − × ÷ și cât de mari sunt numerele','add and subtract up to 20':'adunări și scăderi până la 20','Two digits':'Numere de două cifre','Times tables':'Tabla înmulțirii','2× up to 12×':'de la 2× la 12×',
  Division:'Împărțire','tables in reverse':'tabla, invers',Percentages:'Procente','10%, 25%, 75% of a number':'10%, 25%, 75% dintr-un număr','Negative numbers':'Numere negative','below zero and back':'sub zero și înapoi',
  'Squares and roots':'Pătrate și radicali','Order of operations':'Ordinea operațiilor','multiply before you add':'înmulțirea înaintea adunării',
  Geography:'Geografie','Countries, capitals and flags':'Țări, capitale și steaguri',Capitals:'Capitale','Guess the flag':'Ghicește steagul','pick the continents':'alege continentele',
