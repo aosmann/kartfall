@@ -1,4 +1,5 @@
-/* EduQ v4.1 — v4.1: EduQ.customRow (steppers for custom settings). v4: textbook units (topic.unit = book; Topics / Units tabs via EduQ.topicTabs + topicsOf; units stay out of Mix).
+/* EduQ v5 — v5: Romanian (EduQ.setLang('ro')): questions for every subject except English, subject and topic names, continents, levels.
+   EduQ v4.1 — v4.1: EduQ.customRow (steppers for custom settings). v4: textbook units (topic.unit = book; Topics / Units tabs via EduQ.topicTabs + topicsOf; units stay out of Mix).
    EduQ v3 — shared question bank for the educational games portal (Lanefall, Stackfall, Slicefall, …).
    Extracted from Lanefall v10. v2: no repeats inside a run (a level that runs dry borrows from the topic's other
    levels; only when the whole topic is used up does next() repeat, flagged with Q.repeat and next.exhausted),
@@ -487,6 +488,94 @@ const enUnit2=fixedT({1:[
  ["It can't have ___ easy.", "been", "be", "being", "Speculation: the past"],
  ["Maybe he forgot. He ___ remembered.", "may not have", "mayn't have", "mustn't have", "Speculation: the past"],
  ["It could well have ___ Kay.", "been", "be", "being", "Speculation: the past"]]});
+/* ---- Romanian (EduQ.setLang('ro')): the same questions for every subject except English ---- */
+let LANG='en';
+const RO_CAP={"Algiers":"Alger","Oran":"Oran","Yerevan":"Erevan","Vienna":"Viena","Brussels":"Bruxelles","Antwerp":"Anvers","Prague":"Praga","Copenhagen":"Copenhaga",
+ "Addis Ababa":"Addis Abeba","Athens":"Atena","Thessaloniki":"Salonic","Tehran":"Teheran","Baghdad":"Bagdad","Rome":"Roma","Milan":"Milano","Kuwait City":"Kuweit",
+ "Lisbon":"Lisabona","Warsaw":"Varșovia","Kraków":"Cracovia","Bucharest":"București","Moscow":"Moscova","Saint Petersburg":"Sankt Petersburg","Belgrade":"Belgrad",
+ "Riyadh":"Riad","Seoul":"Seul","Pyongyang":"Phenian","Mexico City":"Ciudad de México","Guatemala City":"Ciudad de Guatemala","Panama City":"Panama","Damascus":"Damasc",
+ "Aleppo":"Alep","Mogadishu":"Mogadiscio","Tashkent":"Tașkent","Ashgabat":"Așgabat","Bishkek":"Bișkek","Dushanbe":"Dușanbe","Ulaanbaatar":"Ulan Bator","Kyiv":"Kiev",
+ "London":"Londra","Washington, D.C.":"Washington","Bern":"Berna","Zurich":"Zürich","Gothenburg":"Göteborg","Luxembourg":"Luxemburg","Munich":"München",
+ "Kathmandu":"Katmandu","Sana'a":"Sanaa","Ho Chi Minh City":"Ho Chi Minh","N'Djamena":"N'Djamena","New York":"New York","Havana":"Havana","Cairo":"Cairo"};
+const RO_COUNTRY={"Afghanistan":"Afganistan","Antigua and Barbuda":"Antigua și Barbuda","Azerbaijan":"Azerbaidjan","Belgium":"Belgia","Bosnia and Herzegovina":"Bosnia și Herțegovina","Brazil":"Brazilia","Cambodia":"Cambodgia","Cameroon":"Camerun","Cape Verde":"Capul Verde","Central African Republic":"Republica Centrafricană","Chad":"Ciad","Colombia":"Columbia","Comoros":"Comore","Croatia":"Croația","Cyprus":"Cipru","Czechia":"Cehia","Denmark":"Danemarca","Dominican Republic":"Republica Dominicană","DR Congo":"Republica Democrată Congo","Egypt":"Egipt","Equatorial Guinea":"Guineea Ecuatorială","Eritrea":"Eritreea","Ethiopia":"Etiopia","Finland":"Finlanda","France":"Franța","Germany":"Germania","Greece":"Grecia","Guinea":"Guineea","Guinea-Bissau":"Guineea-Bissau","Hungary":"Ungaria","Iceland":"Islanda","Indonesia":"Indonezia","Iraq":"Irak","Ireland":"Irlanda","Italy":"Italia","Ivory Coast":"Coasta de Fildeș","Japan":"Japonia","Jordan":"Iordania","Kazakhstan":"Kazahstan","Kuwait":"Kuweit","Kyrgyzstan":"Kârgâzstan","Latvia":"Letonia","Lebanon":"Liban","Libya":"Libia","Lithuania":"Lituania","Luxembourg":"Luxemburg","Malaysia":"Malaezia","Maldives":"Maldive","Marshall Islands":"Insulele Marshall","Mexico":"Mexic","Micronesia":"Micronezia","Moldova":"Republica Moldova","Montenegro":"Muntenegru","Morocco":"Maroc","Mozambique":"Mozambic","Netherlands":"Olanda","New Zealand":"Noua Zeelandă","North Korea":"Coreea de Nord","North Macedonia":"Macedonia de Nord","Norway":"Norvegia","Palestine":"Palestina","Papua New Guinea":"Papua-Noua Guinee","Philippines":"Filipine","Poland":"Polonia","Portugal":"Portugalia","Republic of the Congo":"Republica Congo","Romania":"România","Russia":"Rusia","Saint Kitts and Nevis":"Saint Kitts și Nevis","Saint Lucia":"Sfânta Lucia","Saint Vincent and the Grenadines":"Saint Vincent și Grenadinele","São Tomé and Príncipe":"Sao Tomé și Príncipe","Saudi Arabia":"Arabia Saudită","Slovakia":"Slovacia","Solomon Islands":"Insulele Solomon","South Africa":"Africa de Sud","South Korea":"Coreea de Sud","South Sudan":"Sudanul de Sud","Spain":"Spania","Sweden":"Suedia","Switzerland":"Elveția","Syria":"Siria","Tajikistan":"Tadjikistan","Thailand":"Thailanda","Timor-Leste":"Timorul de Est","Trinidad and Tobago":"Trinidad și Tobago","Turkey":"Turcia","Ukraine":"Ucraina","United Arab Emirates":"Emiratele Arabe Unite","United Kingdom":"Regatul Unit","United States":"Statele Unite","Vatican City":"Vatican"};
+const roName=n=>RO_COUNTRY[n]||n,roCap=n=>RO_CAP[n]||n;
+const RO_PLANET={Mercury:'Mercur',Venus:'Venus',Earth:'Pământ',Mars:'Marte',Jupiter:'Jupiter',Saturn:'Saturn',Uranus:'Uranus',Neptune:'Neptun'};
+const RO_PLANETS=byLv({1:[["Cea mai mare planetă","Jupiter"],["Numită „Planeta Roșie”","Marte"],["Planeta cu cele mai strălucitoare inele","Saturn"],["A treia planetă de la Soare","Pământ"],
+  ["Cea mai apropiată planetă de Soare","Mercur"],["Cea mai mică planetă","Mercur"],["Planeta pe care trăim","Pământ"],["A doua planetă de la Soare","Venus"],["A patra planetă de la Soare","Marte"],["Planeta faimoasă pentru inele","Saturn"],["Poartă numele zeiței romane a iubirii","Venus"],
+  ["„Luceafărul de seară” este de fapt această planetă","Venus"],["Singura planetă pe care știm că există viață","Pământ"],["Planeta albastră, acoperită mai ales de apă","Pământ"],
+  ["Roveri precum Perseverance o explorează","Marte"],["Poartă numele regelui zeilor romani","Jupiter"],["A opta planetă de la Soare","Neptun"],["A șasea planetă de la Soare","Saturn"],
+  ["Inelele ei se văd și cu un telescop mic","Saturn"],["Planeta de după Pământ, pornind de la Soare","Marte"]],
+ 2:[["Cea mai fierbinte planetă","Venus"],["Cea mai îndepărtată planetă de Soare","Neptun"],["Are Marea Pată Roșie","Jupiter"],["Poartă numele zeului roman al războiului","Marte"],
+  ["Poartă numele zeului roman al mării","Neptun"],["Planeta dintre Pământ și Jupiter","Marte"],["Planeta cu cei mai mulți sateliți","Saturn"],["Numită adesea geamăna Pământului","Venus"],["A cincea planetă de la Soare","Jupiter"],["A șaptea planetă de la Soare","Uranus"],
+  ["Poartă numele zeului roman al mesagerilor","Mercur"],["Poartă numele zeului grec al cerului","Uranus"],["Poartă numele zeului roman al agriculturii","Saturn"],
+  ["Are o atmosferă groasă și otrăvitoare de CO₂","Venus"],["Cea mai mare planetă stâncoasă","Pământ"],["Aici e Ganymede, cel mai mare satelit","Jupiter"],
+  ["Anul ei durează 365 de zile","Pământ"],["Anul ei durează doar 88 de zile","Mercur"],["Gigantul gazos cel mai îndepărtat de Soare","Neptun"],["Are praf roșu și doi sateliți mici","Marte"]],
+ 3:[["Planeta care se rotește culcată pe o parte","Uranus"],["Ziua ei e mai lungă decât anul","Venus"],["Atât de ușoară încât ar pluti în apă","Saturn"],["Prima descoperită cu telescopul (1781)","Uranus"],
+  ["Aici e Olympus Mons, cel mai înalt vulcan","Marte"],["Are cele mai puternice vânturi","Neptun"],["Cea mai rapidă orbită în jurul Soarelui","Mercur"],["Are un satelit numit Titan","Saturn"],["Are un satelit numit Triton","Neptun"],["Sateliții ei sunt Phobos și Deimos","Marte"],["Are un satelit numit Europa","Jupiter"],
+  ["Satelitul ei Io este cel mai vulcanic loc cunoscut","Jupiter"],["Are sateliți numiți Miranda și Oberon","Uranus"],["Satelitul ei Enceladus aruncă apă în spațiu","Saturn"],
+  ["Prezisă prin calcule înainte să fie văzută (1846)","Neptun"],["Are canionul Valles Marineris","Marte"],["Are cea mai scurtă zi, cam 10 ore","Jupiter"],
+  ["A avut o furtună numită Marea Pată Întunecată","Neptun"],["A doua cea mai mare planetă","Saturn"],["Cea mai densă planetă","Pământ"],["Cea mai fierbinte suprafață, cam 465 °C","Venus"]]},
+ list=>{const d=deck(list),P=Object.values(RO_PLANET);return()=>{const [q,c]=d();return{q,c,w:pickN(P,2,c)}}});
+const RO_EL={Hydrogen:'Hidrogen',Oxygen:'Oxigen',Carbon:'Carbon',Nitrogen:'Azot',Helium:'Heliu',Sulfur:'Sulf',Neon:'Neon',Argon:'Argon',Fluorine:'Fluor',Lithium:'Litiu',Iodine:'Iod',Boron:'Bor',
+ Iron:'Fier',Copper:'Cupru',Zinc:'Zinc',Chlorine:'Clor',Magnesium:'Magneziu',Aluminium:'Aluminiu',Calcium:'Calciu',Phosphorus:'Fosfor',Silicon:'Siliciu',Nickel:'Nichel',Manganese:'Mangan',Cobalt:'Cobalt',
+ Titanium:'Titan',Chromium:'Crom',Bromine:'Brom',Beryllium:'Beriliu',Gold:'Aur',Silver:'Argint',Sodium:'Sodiu',Potassium:'Potasiu',Lead:'Plumb',Mercury:'Mercur',Tin:'Staniu',Tungsten:'Wolfram',
+ Platinum:'Platină',Uranium:'Uraniu',Krypton:'Kripton',Xenon:'Xenon',Radon:'Radon',Radium:'Radiu',Strontium:'Stronțiu',Barium:'Bariu',Plutonium:'Plutoniu',Antimony:'Stibiu',Bismuth:'Bismut'};
+const RO_BODY=fixedL({1:[["Organul care pompează sângele","inima","plămânii","ficatul"],["Organele cu care respirăm","plămânii","rinichii","inima"],["Mirosim cu…","nasul","urechile","limba"],
+  ["Centrul de comandă al corpului","creierul","inima","stomacul"],["Gustăm cu…","limba","nasul","dinții"],["Scheletul e format din…","oase","mușchi","piele"],["Auzim cu…","urechile","ochii","nasul"],["Vedem cu…","ochii","urechile","mâinile"],["Părțile tari și albe cu care mestecăm","dinții","unghiile","oasele"],["Lichidul pompat prin corp","sângele","apa","aerul"],["Încheietura din mijlocul piciorului","genunchiul","cotul","încheietura mâinii"],
+  ["Atingem și simțim cu…","degetele","urechile","părul"],["Încheietura din mijlocul brațului","cotul","genunchiul","glezna"],["Încheietura dintre mână și braț","încheietura mâinii","glezna","genunchiul"],
+  ["Încheietura dintre labă și picior","glezna","încheietura mâinii","cotul"],["Degete la o mână","5","4","6"],["Câți plămâni avem?","2","1","4"],["Inima este un…","mușchi","os","nerv"],
+  ["Partea de sus a piciorului","coapsa","gamba","glezna"],["Părul crește din…","piele","oase","sânge"],["Gazul pe care îl respirăm ca să trăim","oxigenul","fumul","heliul"]],
+ 2:[["Cel mai mare organ al corpului","pielea","ficatul","creierul"],["Oase în corpul unui adult","206","106","306"],["Dinți la un adult","32","28","24"],["Gazul pe care îl expirăm","CO₂","O₂","H₂"],
+  ["Organele care filtrează sângele","rinichii","plămânii","stomacul"],["Partea colorată a ochiului","irisul","pupila","retina"],["Cel mai lung os","femurul","humerusul","tibia"],["Unde ajunge mâncarea după ce înghițim","în stomac","în plămâni","în inimă"],["Șira spinării se mai numește…","coloana vertebrală","craniul","cutia toracică"],["Oasele care protejează creierul","craniul","coastele","coloana"],["Oasele care protejează plămânii","coastele","craniul","bazinul"],["Vasele care duc sângele înapoi la inimă","venele","arterele","nervii"],
+  ["Dinții din față, ascuțiți, pentru mușcat","incisivii","molarii","caninii"],["Dinții din spate, lați, pentru mestecat","molarii","incisivii","caninii"],["Cercul negru din mijlocul ochiului","pupila","irisul","cristalinul"],
+  ["Vasele care duc sângele de la inimă","arterele","venele","nervii"],["Vase mici între artere și vene","capilarele","nervii","tendoanele"],["Rotula se mai numește…","patela","bazinul","femurul"],
+  ["Inima și vasele de sânge formează sistemul…","circulator","digestiv","nervos"],["Creierul și nervii formează sistemul…","nervos","osos","circulator"],["Camere în inima omului","4","2","3"],
+  ["Organul care adună urina","vezica urinară","rinichiul","stomacul"],["Temperatura normală a corpului","37 °C","35 °C","40 °C"],["Oasele care protejează inima","coastele","craniul","coloana"]],
+ 3:[["Săculeții mici de aer din plămâni","alveolele","bronhiile","vilozitățile"],["Leagă mușchiul de os","tendonul","ligamentul","cartilajul"],["Celulele care ajută sângele să se coaguleze","trombocitele","globulele roșii","globulele albe"],
+  ["Cel mai mare organ intern","ficatul","plămânii","creierul"],["Insulina se produce în…","pancreas","ficat","rinichi"],["Cel mai mic os este în…","ureche","picior","mână"],
+  ["Pigmentul care colorează pielea","melanina","keratina","insulina"],["Celulele care luptă cu infecțiile","globulele albe","globulele roșii","trombocitele"],["Mușchiul de sub plămâni care ne ajută să respirăm","diafragma","bicepsul","abdomenul"],["Tubul prin care aerul ajunge la plămâni","traheea","esofagul","laringele"],["Globulele roșii duc oxigenul cu ajutorul…","hemoglobinei","insulinei","plasmei"],["Partea lichidă a sângelui","plasma","trombocitele","bila"],["Celulele nervoase se numesc…","neuroni","nefroni","trombocite"],
+  ["Organul care păstrează bila","vezica biliară","pancreasul","splina"],["Clapeta care oprește mâncarea să intre în trahee","epiglota","omușorul","laringele"],["Organul vocii","laringele","faringele","traheea"],
+  ["Camerele de sus ale inimii","atriile","ventriculele","valvele"],["Camerele de jos ale inimii","ventriculele","atriile","valvele"],["Cea mai mare arteră","aorta","vena cavă","carotida"],
+  ["Proeminențe ca niște degete în intestinul subțire","vilozitățile","alveolele","cilii"],["Leagă un os de alt os","ligamentul","tendonul","cartilajul"],["Partea creierului pentru echilibru","cerebelul","emisferele cerebrale","trunchiul cerebral"],
+  ["Stratul sensibil la lumină din spatele ochiului","retina","corneea","irisul"],["Oasele degetelor","falangele","oasele carpiene","oasele tarsiene"],["Osul de sub gât, spre umăr","clavicula","omoplatul","sternul"],
+  ["Hormonul stresului, făcut de glandele suprarenale","adrenalina","insulina","melanina"]]});
+const RO_SHORTCUTS={1:[["COPIERE","Ctrl+C"],["LIPIRE","Ctrl+V"],["ANULARE","Ctrl+Z"],["SALVARE","Ctrl+S"],["DECUPARE","Ctrl+X"],["SELECTEAZĂ TOT","Ctrl+A"],["REÎMPROSPĂTARE PAGINĂ","F5"],["AJUTOR","F1"],["IMPRIMARE","Ctrl+P"],["CĂUTARE","Ctrl+F"],["FILĂ NOUĂ","Ctrl+T"],["ECRAN COMPLET","F11"]],
+ 2:[["CĂUTARE","Ctrl+F"],["IMPRIMARE","Ctrl+P"],["REFACERE","Ctrl+Y"],["FILĂ NOUĂ","Ctrl+T"],["ÎNGROȘAT","Ctrl+B"],["DOCUMENT NOU","Ctrl+N"],["SUBLINIAT","Ctrl+U"],["CURSIV","Ctrl+I"],["MĂRIRE","Ctrl++"],["MICȘORARE","Ctrl+-"],["DESCHIDERE FIȘIER","Ctrl+O"],["BARA DE ADRESE","Ctrl+L"],["ISTORIC","Ctrl+H"],["DESCĂRCĂRI","Ctrl+J"]],
+ 3:[["ÎNCHIDE FILA","Ctrl+W"],["REDESCHIDE FILA ÎNCHISĂ","Ctrl+Shift+T"],["COMUTĂ ÎNTRE APLICAȚII","Alt+Tab"],["MANAGER DE ACTIVITĂȚI","Ctrl+Shift+Esc"],["BLOCHEAZĂ CALCULATORUL","Win+L"],
+  ["ARATĂ DESKTOPUL","Win+D"],["CAPTURĂ DE ECRAN","Win+Shift+S"],["REDENUMEȘTE FIȘIERUL","F2"],["EXPLORER","Win+E"],["FEREASTRA EXECUTARE","Win+R"],["ÎNCHIDE FEREASTRA","Alt+F4"],
+  ["SETĂRI","Win+I"],["PANOUL EMOJI","Win+."],["ISTORICUL CLIPBOARD","Win+V"],["FOLDER NOU","Ctrl+Shift+N"],["FILA URMĂTOARE","Ctrl+Tab"],["MINIMIZEAZĂ TOATE FERESTRELE","Win+M"]]};
+const RO_SHORT=(()=>{const fw=pairedL(RO_SHORTCUTS,k=>`Scurtătura pentru ${k}`),bw=byLv(RO_SHORTCUTS,list=>{const acts=list.map(p=>p[0].toLowerCase()),d=deck(list);
+  return()=>{const [a,k]=d(),c=a.toLowerCase();return{q:`${k} este scurtătura pentru…`,c,w:pickN(acts,2,c)}}});return()=>Math.random()<.5?fw():bw()})();
+const RO_UNITS=fixedL({1:[["Biți într-un octet (byte)","8","4","16"],["Sistemul binar folosește 0 și…","1","2","10"],["Cea mai mică unitate de date","bitul","octetul","nibble"],
+  ["Cel mai mare dintre acestea","gigabyte","megabyte","kilobyte"],["Biți în 2 octeți","16","8","32"],["Cel mai mic dintre acestea","kilobyte","megabyte","gigabyte"],["Viteza internetului se măsoară în…","Mbps","MB","°C"],["Un cântec are de obicei câțiva…","megabytes","terabytes","biți"],["Octeți într-un kilobyte (kB)","1000","100","10"],["Ce încape mai mult?","1 TB","1 GB","1 MB"],["Biți în 4 octeți","32","16","24"],
+  ["Biți în 8 octeți","64","32","16"],["O fotografie are de obicei câțiva…","megabytes","biți","terabytes"],["1 GB înseamnă cam 1000…","megabytes","kilobytes","terabytes"],
+  ["1 TB înseamnă cam 1000…","gigabytes","megabytes","kilobytes"],["Un mesaj scurt are câteva sute de…","octeți","gigabytes","terabytes"],["„b” mic din Mbps înseamnă…","biți","octeți","benzi"],
+  ["„B” mare din MB înseamnă…","octeți","biți","binar"],["Octeți în 2 kB","2000","200","20"],["Biți într-o jumătate de octet","4","2","6"],["Care e cel mai mic?","1 bit","1 octet","1 kB"],
+  ["Care e mai mare?","1 GB","100 MB","500 kB"],["8 biți formează 1…","octet","kilobyte","nibble"]],
+ 2:[["Biți într-un nibble","4","8","2"],["Hex A în zecimal","10","11","16"],["Hex F în zecimal","15","16","14"],["Octeți într-un KiB","1024","1000","512"],
+  ["Cel mai mare dintre acestea","terabyte","gigabyte","petabit"],["Hex 10 în zecimal","16","10","20"],["Hex B în zecimal","11","12","10"],["Biți în 3 octeți","24","12","32"],["12 zecimal în hex","C","B","12"],
+  ["Hex C în zecimal","12","13","11"],["Hex D în zecimal","13","14","12"],["Hex E în zecimal","14","15","13"],["15 zecimal în hex","F","E","15"],["10 zecimal în hex","A","10","B"],
+  ["Cifrele hex merg de la 0 la…","F","9","G"],["Hex 12 în zecimal","18","12","20"],["MiB într-un GiB","1024","1000","512"],["Biți într-un kB (1000 octeți)","8000","1000","1024"],
+  ["Sistemul hexazecimal are baza…","16","8","2"],["Sistemul binar are baza…","2","10","8"],["Numerele de zi cu zi au baza…","10","2","16"]],
+ 3:[["Hex FF în zecimal","255","256","240"],["Cea mai mare valoare într-un octet","255","256","128"],["Biți în 4 octeți","32","16","64"],["Hex 1F în zecimal","31","25","15"],
+  ["KiB într-un MiB","1024","1000","512"],["Valori diferite într-un octet","256","255","128"],["Hex 2A în zecimal","42","32","24"],["Hex 64 în zecimal","100","64","96"],["200 zecimal în hex","C8","B8","D0"],["Biți necesari pentru 0–255","8","16","7"],
+  ["Hex 80 în zecimal","128","80","100"],["Hex 7F în zecimal","127","128","117"],["Hex A0 în zecimal","160","100","170"],["255 zecimal în hex","FF","EF","F0"],
+  ["16 zecimal în hex","10","F","16"],["32 zecimal în hex","20","32","1F"],["Hex 3C în zecimal","60","36","54"],["Octeți în 64 de biți","8","4","16"],
+  ["Valori diferite în 16 biți","65536","65535","32768"],["Cea mai mare valoare pe 4 biți","15","16","8"],["Cifre hex necesare pentru un octet","2","1","4"],["kB într-un MB","1000","100","10"]]});
+/* a generator in Romanian: the same maths, the Romanian wording */
+function roOf(name,Q){
+  if(name==='percent')return Object.assign({},Q,{q:Q.q.replace(' of ',' din ')});
+  if(name==='binary')return Object.assign({},Q,{q:Q.q.replace(' in decimal',' în zecimal').replace(' in binary',' în binar')});
+  if(name==='capitals'){const asCap=/^Capital of /.test(Q.q);
+    if(asCap){const country=Q.q.replace(/^Capital of (the )?/,'');return Object.assign({},Q,{q:`Capitala țării ${roName(country)}`,c:roCap(Q.c),w:Q.w.map(roCap)})}
+    const cap=Q.q.replace(/ is the capital of…$/,'');return Object.assign({},Q,{q:`${roCap(cap)} este capitala țării…`,c:roName(Q.c),w:Q.w.map(roName)})}
+  if(name==='flags')return Object.assign({},Q,{q:'Ce țară are acest steag?',c:roName(Q.c),w:Q.w.map(roName)});
+  if(name==='elements'){if(/^Which element is /.test(Q.q))return Object.assign({},Q,{q:Q.q.replace(/^Which element is (.+)\?$/,'Ce element este $1?'),c:RO_EL[Q.c]||Q.c,w:Q.w.map(x=>RO_EL[x]||x)});
+    const en=Q.q.replace(/^Chemical symbol for /,''),n=Object.keys(RO_EL).find(k=>k.toUpperCase()===en);return Object.assign({},Q,{q:`Simbolul chimic pentru ${(RO_EL[n]||en).toUpperCase()}`})}
+  return Q}
+const ro=(name,gen)=>()=>LANG==='ro'?roOf(name,gen()):gen();
+const roList=(gen,roGen)=>()=>LANG==='ro'?roGen():gen();
+
 const SUBJECTS=[
  {id:'english',name:'English',g:'Aa',blurb:'Grammar, words and spelling',topics:[
   {id:'irregular',name:'Irregular verbs',bl:'went, gone, taught, written',d:1,gen:irregular},
@@ -502,21 +591,21 @@ const SUBJECTS=[
   {id:'twodigits',name:'Two digits',bl:'47 + 28, 83 − 36',d:2,gen:twoDigits},
   {id:'times',name:'Times tables',bl:'2× up to 12×',d:2,gen:times},
   {id:'division',name:'Division',bl:'tables in reverse',d:2,gen:division},
-  {id:'percent',name:'Percentages',bl:'10%, 25%, 75% of a number',d:3,gen:percent},
+  {id:'percent',name:'Percentages',bl:'10%, 25%, 75% of a number',d:3,gen:ro('percent',percent)},
   {id:'negatives',name:'Negative numbers',bl:'below zero and back',d:3,gen:negatives},
   {id:'squares',name:'Squares and roots',bl:'12², √81',d:3,gen:squares},
   {id:'order',name:'Order of operations',bl:'multiply before you add',d:3,gen:order}]},
  {id:'geo',name:'Geography',g:'◎',blurb:'Countries, capitals and flags',topics:[
-  {id:'capitals',name:'Capitals',bl:'pick the continents',d:1,regions:true,gen:capitals},
-  {id:'flags',name:'Guess the flag',bl:'pick the continents',d:1,regions:true,gen:flags}]},
+  {id:'capitals',name:'Capitals',bl:'pick the continents',d:1,regions:true,gen:ro('capitals',capitals)},
+  {id:'flags',name:'Guess the flag',bl:'pick the continents',d:1,regions:true,gen:ro('flags',flags)}]},
  {id:'science',name:'Science',g:'H₂O',blurb:'Space, chemistry and the body',topics:[
-  {id:'planets',name:'Planets',bl:'our solar system',d:1,gen:planets},
-  {id:'body',name:'Human body',bl:'organs, bones and blood',d:2,gen:body},
-  {id:'elements',name:'Chemical symbols',bl:'Fe, Au, Na and friends',d:3,gen:elements}]},
+  {id:'planets',name:'Planets',bl:'our solar system',d:1,gen:roList(planets,RO_PLANETS)},
+  {id:'body',name:'Human body',bl:'organs, bones and blood',d:2,gen:roList(body,RO_BODY)},
+  {id:'elements',name:'Chemical symbols',bl:'Fe, Au, Na and friends',d:3,gen:ro('elements',elements)}]},
  {id:'info',name:'Informatics',g:'01',blurb:'Binary, code and computers',topics:[
-  {id:'shortcuts',name:'Keyboard shortcuts',bl:'Ctrl + the right key',d:1,gen:shortcuts},
-  {id:'units',name:'Data units',bl:'bits, bytes and hex',d:1,gen:units},
-  {id:'binary',name:'Binary numbers',bl:'4-bit, both directions',d:2,gen:binary},
+  {id:'shortcuts',name:'Keyboard shortcuts',bl:'Ctrl + the right key',d:1,gen:roList(shortcuts,RO_SHORT)},
+  {id:'units',name:'Data units',bl:'bits, bytes and hex',d:1,gen:roList(units,RO_UNITS)},
+  {id:'binary',name:'Binary numbers',bl:'4-bit, both directions',d:2,gen:ro('binary',binary)},
   {id:'python',name:'Python operators',bl:'//, %, **, len()',d:3,gen:python}]},
 ];
 const ALL=SUBJECTS.flatMap(s=>s.topics).filter(t=>!t.unit);
@@ -548,7 +637,7 @@ const REG_KEY='edu-regions';
 function getRegions(tid){try{const v=(JSON.parse(localStorage.getItem(REG_KEY)||'{}')||{})[tid];if(Array.isArray(v)){const ok=v.filter(x=>REGION_IDS.includes(x));if(ok.length)return ok}}catch(e){}return REGION_IDS.slice()}
 function setRegions(tid,list){const ok=(list||[]).filter(x=>REGION_IDS.includes(x));try{const all=JSON.parse(localStorage.getItem(REG_KEY)||'{}')||{};all[tid]=ok.length?ok:REGION_IDS.slice();localStorage.setItem(REG_KEY,JSON.stringify(all))}catch(e){}}
 const parseRegions=v=>{const ok=String(v||'').split(',').map(x=>x.trim()).filter(x=>REGION_IDS.includes(x));return ok.length?ok:null};
-function regionLabel(list){const l=list&&list.length?list:REGION_IDS;return l.length===REGION_IDS.length?'All continents':l.map(id=>REGIONS.find(r=>r.id===id).name).join(', ')}
+function regionLabel(list){const l=list&&list.length?list:REGION_IDS;return l.length===REGION_IDS.length?(LANG==='ro'?'Toate continentele':'All continents'):l.map(id=>REGIONS.find(r=>r.id===id).name).join(', ')}
 /* a row of continent chips for a game's own menu. Colours follow the menu (currentColor);
    a game can set --eq-on-bg / --eq-on-fg on a parent to match its theme. */
 let pickerCss=false;
@@ -566,7 +655,7 @@ function regionPicker(topic,opts){opts=opts||{};if(!topic||!topic.regions)return
       b.onclick=e=>{e.stopPropagation();let next;if(id==='all')next=REGION_IDS.slice();else if(all)next=[id];
         else{next=cur.includes(id)?cur.filter(x=>x!==id):cur.concat(id);if(!next.length)next=REGION_IDS.slice()}
         setRegions(topic.id,next);paint();opts.onChange&&opts.onChange(getRegions(topic.id))};return b};
-    box.append(mk('all','All',all));REGIONS.forEach(r=>box.append(mk(r.id,r.name,!all&&cur.includes(r.id))))};
+    box.append(mk('all',LANG==='ro'?'Toate':'All',all));REGIONS.forEach(r=>box.append(mk(r.id,r.name,!all&&cur.includes(r.id))))};
   /* colours from the menu's own text colour, so chips read on light cards and dark scenes alike;
      a game can still set --eq-bg, --eq-fg, --eq-line, --eq-on-bg, --eq-on-fg itself */
   /* the chips' colours follow the background they actually sit on (nearest opaque ancestor) */
@@ -620,7 +709,7 @@ function topicTabs(s,t,onPick){if(!hasUnits(s))return null;
 .eq-tabs button:focus-visible{outline:2px solid var(--eq-on-bg);outline-offset:2px}`;document.head.append(st)}
   const box=document.createElement('div');box.className='eq-tabs';box.setAttribute('role','tablist');box.setAttribute('aria-label','Topics or units');
   const cur=t&&t.unit?'units':'topics';
-  [['topics','Topics'],['units','Units']].forEach(([id,name])=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','tab');
+  (LANG==='ro'?[['topics','Teme'],['units','Unități']]:[['topics','Topics'],['units','Units']]).forEach(([id,name])=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','tab');
     b.textContent=name;b.setAttribute('aria-selected',id===cur);
     b.onclick=e=>{e.stopPropagation();if(id===cur)return;const l=s.topics.filter(x=>!!x.unit===(id==='units'));if(l.length&&onPick)onPick(l[0].id)};box.append(b)});
   eqTone(box);return box}
@@ -638,9 +727,115 @@ function stream(topic,level,opts){opts=opts||{};const used=new Set(),recent=[],d
     used.add(k);recent.push(k);if(recent.length>12)recent.shift();
   const c=String(Q.c),seen=new Set([c]);const raw=Q.w.slice(0,2);while(raw.length<2)raw.push(c);
   const w=raw.map(v=>{let x=String(v);while(seen.has(x))x=isNaN(+x)?x+'s':String(+x+1);seen.add(x);return x});
-  const ans=shuffle([c,...w]);return{q:Q.q,img:Q.img||null,code:Q.code||null,tag:Q.tag||null,ans,correct:ans.indexOf(c),answer:c,repeat}}
+  const ans=shuffle([c,...w]);skip(Q.q);ans.forEach(skip);return{q:Q.q,img:Q.img||null,code:Q.code||null,tag:Q.tag||null,ans,correct:ans.indexOf(c),answer:c,repeat}}
   next.exhausted=false;next.regions=regs;return next}
+
+/* language for questions and names: 'en' (default) or 'ro'. English topics stay English. */
+const NAMES_RO={English:'Engleză','Grammar, words and spelling':'Gramatică, vocabular și ortografie','Irregular verbs':'Verbe neregulate',Opposites:'Antonime',Tenses:'Timpuri verbale',Prepositions:'Prepoziții',Spelling:'Ortografie','Phrasal verbs':'Verbe frazale',
+ 'the words everyone gets wrong':'cuvintele pe care le greșește toată lumea','present, past, perfect, continuous':'prezent, trecut, perfect, continuu','hot and cold, win and lose':'hot și cold, win și lose',
+ Math:'Matematică','Mental arithmetic, fast':'Calcul mintal, rapid','Quick sums':'Adunări rapide','add and subtract up to 20':'adunări și scăderi până la 20','Two digits':'Numere de două cifre','Times tables':'Tabla înmulțirii','2× up to 12×':'de la 2× la 12×',
+ Division:'Împărțire','tables in reverse':'tabla, invers',Percentages:'Procente','10%, 25%, 75% of a number':'10%, 25%, 75% dintr-un număr','Negative numbers':'Numere negative','below zero and back':'sub zero și înapoi',
+ 'Squares and roots':'Pătrate și radicali','Order of operations':'Ordinea operațiilor','multiply before you add':'înmulțirea înaintea adunării',
+ Geography:'Geografie','Countries, capitals and flags':'Țări, capitale și steaguri',Capitals:'Capitale','Guess the flag':'Ghicește steagul','pick the continents':'alege continentele',
+ Science:'Științe','Space, chemistry and the body':'Spațiu, chimie și corpul uman',Planets:'Planete','our solar system':'sistemul nostru solar','Human body':'Corpul uman','organs, bones and blood':'organe, oase și sânge',
+ 'Chemical symbols':'Simboluri chimice','Fe, Au, Na and friends':'Fe, Au, Na și prietenii',Informatics:'Informatică','Binary, code and computers':'Binar, cod și calculatoare','Keyboard shortcuts':'Scurtături de tastatură',
+ 'Ctrl + the right key':'Ctrl + tasta potrivită','Data units':'Unități de date','bits, bytes and hex':'biți, octeți și hexazecimal','Binary numbers':'Numere binare','4-bit, both directions':'pe 4 biți, în ambele sensuri','Python operators':'Operatori Python',
+ 'Mix it up':'Amestec','Questions from every subject':'Întrebări din toate materiile','Easy mix':'Amestec ușor','every easy topic':'toate temele ușoare','Surprise me':'Surprinde-mă','any topic, any subject':'orice temă, orice materie',
+ 'Hard mix':'Amestec greu','only the toughest topics':'doar temele cele mai grele','A2 · Unit 1':'A2 · Unitatea 1','B2+ · Unit 2':'B2+ · Unitatea 2',
+ 'Check it! A2 · routines, free time, town':'Check it! A2 · rutina zilnică, timp liber, orașul','Check it! B2+ · modals, cars and the road, take/make/do':'Check it! B2+ · verbe modale, mașini și drumuri, take/make/do',
+ Europe:'Europa',Americas:'Americi'};
+const DIFF_EN=['','Easy','Medium','Hard'],DIFF_RO=['','Ușor','Mediu','Greu'];
+function setLang(l){l=l==='ro'?'ro':'en';LANG=l;
+  const sw=o=>{for(const k of ['name','bl','blurb']){if(o[k]==null)continue;if(o['_'+k]==null)o['_'+k]=o[k];o[k]=l==='ro'?(NAMES_RO[o['_'+k]]||o['_'+k]):o['_'+k]}};
+  SUBJECTS.forEach(s=>{sw(s);s.topics.forEach(sw)});REGIONS.forEach(sw);DIFF_EN.forEach((x,i)=>{DIFFNAME[i]=l==='ro'?DIFF_RO[i]:x})}
+const getLang=()=>LANG;
+
+/* ---- Romanian for the games' own screens: when the language is Romanian (?lang=ro from the portal, or the
+   choice saved by the portal on this site), menus and labels are swapped for Romanian as they appear.
+   Question and answer text is never touched. The portal has its own translator and turns this off. ---- */
+const SKIP=new Set(),skip=t=>{if(t==null)return;SKIP.add(String(t));if(SKIP.size>400)SKIP.delete(SKIP.values().next().value)};
+const GAME_RO={
+ '(no answer)':'(fără răspuns)','+1 gold':'+1 aur','+2 Quick!':'+2 Rapid!','· new best':'· record nou','10 in a row · another sweep':'10 la rând · încă o măturare',
+ '3 in a row doubles your points, 5 in a row triples':'3 la rând îți dublează punctele, 5 la rând le triplează','3 in a row doubles, 5 in a row triples':'3 la rând dublează, 5 la rând triplează',
+ '3 in a row · ×2':'3 la rând · ×2','3 in a row · ×2 line points':'3 la rând · ×2 puncte pe linie','3 in a row! Points ×2':'3 la rând! Puncte ×2','5 in a row · ×3':'5 la rând · ×3',
+ '5 in a row · ×3 · bottom row swept':'5 la rând · ×3 · rândul de jos măturat','5 in a row! Points ×3':'5 la rând! Puncte ×3',
+ 'A block falls while you answer. Right: it drops into the best spot. Fast: +1 more':'O piesă cade cât răspunzi. Corect: ajunge în cel mai bun loc. Repede: încă +1',
+ 'A chess clock: right answers add seconds, wrong ones take them':'Ceas de șah: răspunsurile corecte adaugă secunde, cele greșite le scad',
+ 'A chess clock: right answers add seconds, wrong or slow ones take them':'Ceas de șah: răspunsurile corecte adaugă secunde, cele greșite sau lente le scad',
+ 'A wrong hoop costs a ball. You have three':'Un coș greșit te costă o minge. Ai trei','A wrong hoop costs one of your 3 balls':'Un coș greșit te costă una din cele 3 mingi',
+ 'AIR':'AER','Air ball!':'Pe lângă!','An air ball costs time and your streak':'O aruncare pe lângă te costă timp și seria','Answer fast. Every right answer drops a block perfectly.':'Răspunde repede. Fiecare răspuns corect așază piesa perfect.',
+ 'Answer right. Boost ahead.':'Răspunde corect. Accelerează.','Answers':'Răspunsuri','Answers right':'Răspunsuri corecte','Artist':'Artist','Ball':'Minge','Barriers passed':'Obstacole trecute',
+ 'Basketball court. Flick the ball up into the hoop with the right answer, or press 1, 2 or 3.':'Teren de baschet. Aruncă mingea în coșul cu răspunsul corect sau apasă 1, 2 sau 3.',
+ 'Best streak':'Cea mai lungă serie','Blockfall!':'Blockfall!','Blue hoops':'Coșuri albastre','Brilliant!':'Genial!','CLOCK':'CEAS','Camera: behind the kart':'Cameră: în spatele kartului',
+ 'Camera: driver’s seat':'Cameră: din scaunul pilotului','Change topic':'Schimbă tema','Character':'Personaj','Choose a subject':'Alege o materie','Choose another topic':'Alege altă temă',
+ 'Classic':'Clasic','Click the right answer, or press 1 · 2 · 3':'Apasă răspunsul corect sau tastele 1 · 2 · 3','Clock':'Ceas','Coins':'Monede','Combo lost':'Combo pierdut','Combo ×2':'Combo ×2','Combo ×3':'Combo ×3',
+ 'Custom':'Personalizat','Desert':'Deșert','Difficulty':'Dificultate','Done':'Gata','Double!':'Dublu!','Dress the keeper':'Îmbracă portarul',
+ 'Drive over the right answer for a turbo · swipe or ← →':'Treci peste răspunsul corect pentru turbo · glisează sau ← →','Dropped!':'A căzut!','Easy':'Ușor',
+ 'Easy: big hoops that stay still.':'Ușor: coșuri mari care stau pe loc.','Easy: blocks fall slowly.':'Ușor: piesele cad încet.','Ember':'Jar','End race':'Oprește cursa','End run':'Oprește jocul',
+ 'Every 5 in a row also clears the bottom row':'Fiecare serie de 5 golește și rândul de jos','Every answer right.':'Toate răspunsurile corecte.','Every answer right. Champion driving!':'Toate corecte. Ai condus ca un campion!',
+ 'Every answer right. Not one bomb.':'Toate corecte. Nicio bombă.','Every answer right. Well run.':'Toate corecte. Bravo!','Every shot in the net. Perfect run!':'Toate loviturile în poartă. Perfect!',
+ 'Every shot in the right hoop.':'Toate aruncările în coșul corect.','Everyone finished!':'Au terminat toți!','FINISH!':'SOSIRE!',
+ 'Falling block board. Answer the question before the block lands: a right answer drops it into the best spot.':'Tablă cu piese care cad. Răspunde înainte să aterizeze piesa: un răspuns corect o așază în cel mai bun loc.',
+ 'Fifteen straight':'Cincisprezece la rând','Final lap!':'Ultima tură!','Flag':'Steag','Flick it in. Nothing but the right answer.':'Aruncă la coș. Doar răspunsul corect.',
+ 'Flick the ball through the right hoop':'Aruncă mingea prin coșul corect','Flick the ball up into the right hoop':'Aruncă mingea în coșul corect','Flick the ball up through the hoop with the right answer':'Aruncă mingea în coșul cu răspunsul corect',
+ 'Football':'Fotbal','Frenzy!':'Frenezie!','Frost':'Ger','Frosty Peaks':'Vârfurile înghețate','Fruit master!':'Maestrul fructelor!','Full rows clear. 3 right in a row doubles line points, 5 triples':'Rândurile pline dispar. 3 corecte la rând dublează punctele pe linie, 5 le triplează',
+ 'Full time':'Final de meci','Genius':'Geniu','Go':'Start','Go!':'Start!','Gold floor':'Etaj de aur','Green & gold':'Verde și auriu','Hall of fame':'Galeria campionilor','Hard':'Greu',
+ 'Hard: fast blocks, and wrong answers lean towards bad spots.':'Greu: piese rapide, iar răspunsurile greșite le duc în locuri proaste.','Hard: small hoops that slide left and right. Lead your shot.':'Greu: coșuri mici care alunecă stânga-dreapta. Țintește înainte.',
+ 'Heating up':'Te încălzești','Home':'Acasă','I KNOW IT!':'ȘTIU!','I know it!':'Știu!','Juicy!':'Zemos!','KM/H':'KM/H','Karts appear here as students join.':'Karturile apar aici pe măsură ce intră elevii.',
+ 'Keeper kit':'Echipamentul portarului','Kick off':'Lovitura de start','Kick off!':'Începe meciul!','LAP':'TURA','LEARN BY PLAYING':'ÎNVEȚI JUCÂNDU-TE','Laps':'Ture','Legend':'Legendă','Legendary!':'Legendar!','Level':'Nivel',
+ 'Lilac':'Liliac','Lines cleared':'Linii eliminate','Lives':'Vieți','Lives left':'Vieți rămase','Medium':'Mediu','Medium: blocks fall faster.':'Mediu: piesele cad mai repede.','Medium: smaller hoops at different heights.':'Mediu: coșuri mai mici, la înălțimi diferite.',
+ 'Miss':'Ratat','Miss every hoop: no ball lost, but 2 seconds and your streak':'Pe lângă toate coșurile: nu pierzi mingea, dar pierzi 2 secunde și seria','Moss':'Mușchi','Mountain climb · icy bends':'Urcuș pe munte · curbe cu gheață','Music':'Muzică','Neon':'Neon',
+ 'New best':'Record nou','New best!':'Record nou!','New record':'Record nou','New record!':'Record nou!','Next · choose a track':'Mai departe · alege o pistă','Nice':'Bravo','Night':'Noapte',
+ 'No answer in time: it lands wherever it falls':'Fără răspuns la timp: aterizează unde cade','No answer: it lands where it falls':'Fără răspuns: aterizează unde cade','No answers this time':'Niciun răspuns de data asta',
+ 'No good!':'Nu!','No misses. Clean run.':'Nicio greșeală. Curat!','No room for the next block':'Nu mai e loc pentru următoarea piesă','Normal':'Normal','Nothing but net on the right hoop: +1 bonus':'Direct prin plasă la coșul corect: +1 bonus','Ocean':'Ocean',
+ 'On a roll':'Ești în formă','On fire!':'În flăcări!','On target':'Pe țintă','Orange halves':'Jumătăți portocalii','Out of balls':'Fără mingi','Out of hearts':'Fără inimi','Out of lives':'Fără vieți','Out of this world':'De pe altă lume','Out of time':'Timpul a expirat',
+ 'Pause':'Pauză','Paused':'Pauză','Pick a ball':'Alege o minge','Pick a subject':'Alege o materie','Pick a track':'Alege o pistă','Pick a world':'Alege o lume','Pick your runner':'Alege-ți alergătorul','Play':'Joacă','Play again':'Mai joacă o dată','Play for':'Joacă',
+ 'Podium':'Podium','Points':'Puncte','Purple sash':'Eșarfă mov','Quick':'Rapid','READ · AIM · SCORE':'CITEȘTE · ȚINTEȘTE · MARCHEAZĂ','Race again':'Mai fă o cursă','Race ended':'Cursa s-a terminat','Race finished':'Cursă terminată','Race!':'Cursă!','Racer':'Pilot','Ranking':'Clasament',
+ 'Read it. Aim it. Score.':'Citește. Țintește. Marchează.','Ready…':'Pregătiți…','Record beaten':'Record doborât','Red rocks · two jumps':'Stânci roșii · două sărituri','Red stripes':'Dungi roșii','Relaxed':'Relaxat','Result sent to your teacher.':'Rezultatul a fost trimis profesorului.',
+ 'Resume':'Continuă','Review':'Recapitulare','Right':'Corect','Right adds time, wrong takes it. The fruit speed up':'Corect adaugă timp, greșit scade. Fructele accelerează','Right answers add time, wrong ones take it':'Răspunsurile corecte adaugă timp, cele greșite scad',
+ 'Right answers stack up. Wrong ones knock it down.':'Răspunsurile corecte construiesc. Cele greșite dărâmă.','Right! The block drops into the best spot.':'Corect! Piesa ajunge în cel mai bun loc.','Right! Turbo boost!':'Corect! Turbo!','Right: the block drops into the best spot':'Corect: piesa ajunge în cel mai bun loc',
+ 'Rolling hills · big jump':'Dealuri · săritură mare','Run again':'Mai aleargă o dată','Run ended':'Jocul s-a terminat','Run length':'Durata','Run over':'Gata','Run the lanes. Answer on the move.':'Aleargă pe culoare. Răspunde din mers.','SLOW':'ÎNCET','SWEEP':'MĂTURARE','SWISH':'PLASĂ',
+ 'Sassy':'Obraznic','Saved!':'Apărat!','Seaside bridge · easy':'Pod la mare · ușor','Seconds':'Secunde','Seconds left':'Secunde rămase','Sharp!':'Ager!','Shoot again':'Mai trage o dată','Shoot!':'Trage!','Shots':'Lovituri','Skip':'Sari peste','Slice again':'Mai taie o dată',
+ 'Slice the right answer. Dodge the bombs.':'Taie răspunsul corect. Ferește-te de bombe.','Slice!':'Taie!','Sound':'Sunet','Sound effects':'Efecte sonore','Sound: on':'Sunet: pornit','Space':'Spațiu','Stacked to the top':'Ai ajuns până sus','Starry':'Înstelat','Start':'Start',
+ 'Start race':'Pornește cursa','Start run':'Pornește','Start with 10 s. Right adds 1 s, wrong or dropped takes 1 s. Fruit speed up':'Începi cu 10 s. Corect adaugă 1 s, greșit sau scăpat scade 1 s. Fructele accelerează',
+ 'Streak lost':'Serie pierdută','Streak towards a sweep':'Serie spre o măturare','Streaks multiply. Every 8th wave is a frenzy':'Seriile multiplică punctele. Fiecare al 8-lea val e o frenezie','Subjects':'Materii','Sunny Meadow':'Pajiștea însorită',
+ 'Swipe from the ball to the right answer':'Glisează de la minge spre răspunsul corect','Swipe left':'Glisează la stânga','Swipe right':'Glisează la dreapta','Swipe through the fruit with the right answer':'Taie fructul cu răspunsul corect','Swipe through the right answer':'Taie răspunsul corect',
+ 'Swirl':'Vârtej','Swish for +1. 3 in a row doubles, 5 triples':'Direct prin plasă: +1. 3 la rând dublează, 5 triplează','Swishes':'Aruncări curate','Switch camera':'Schimbă camera','TIME':'TIMP','Tallest':'Cel mai înalt','Ten straight':'Zece la rând',
+ 'The blocks reached the top. The run is over.':'Piesele au ajuns sus. Jocul s-a terminat.','The wrong ones are bombs in disguise':'Cele greșite sunt bombe deghizate','Theme':'Temă vizuală','This flag':'Acest steag',
+ 'Three lives. A right fruit that drops costs one':'Trei vieți. Un fruct corect scăpat te costă una','Tide':'Maree','Time':'Timp','Time left':'Timp rămas','Time\'s up':'Timpul a expirat','Topic':'Temă','Topic cleared: every question done':'Temă terminată: toate întrebările rezolvate',
+ 'Topic complete':'Temă completă','Triple!':'Triplu!','Turbo to the answers':'Turbo spre răspunsuri','Twenty straight':'Douăzeci la rând','Unstoppable':'De neoprit','Unstoppable!':'De neoprit!','Waiting for racers…':'Așteptăm piloții…','Waiting for the teacher…':'Așteptăm profesorul…',
+ 'Winter':'Iarnă','Wrong fruit are bombs. Don\'t let the right one drop':'Fructele greșite sunt bombe. Nu scăpa fructul corect','Wrong hoop':'Coș greșit','Wrong: it lands somewhere random':'Greșit: aterizează la întâmplare','Wrong: the block lands somewhere random':'Greșit: piesa aterizează la întâmplare',
+ 'You ended the run':'Ai oprit jocul','You fell off the track':'Ai ieșit de pe pistă','You hit a wall':'Ai lovit un zid','Your kart is on the grid. Everyone starts together.':'Kartul tău e la start. Toți pornesc deodată.',
+ 'Your record for each topic is kept per level and clock.':'Recordul pentru fiecare temă se păstrează pe nivel și ceas.','Your record for each topic is kept per level and time.':'Recordul pentru fiecare temă se păstrează pe nivel și timp.',
+ 'floors':'etaje','goals scored':'goluri marcate','in a row':'la rând','lines back to back':'linii una după alta','not bad at all':'deloc rău','okay, show-off':'bine, bine, fălosule','points':'puncte','pts':'pct','push for the flag':'luptă pentru steag','still going':'continuă','streak':'serie','sweep':'măturare',
+ 'to change lane':'ca să schimbi culoarul','too slow':'prea încet','two questions at once':'două întrebări deodată','⚡ TURBO':'⚡ TURBO','Worth another look':'Merită să le mai vezi','Right answer':'Răspuns corect','Wrong answer':'Răspuns greșit','Answer':'Răspuns',
+ 'Choose a topic':'Alege o temă','Back':'Înapoi','Settings':'Setări','Close':'Închide','Mute':'Fără sunet','Topics':'Teme','Units':'Unități','Score':'Scor','Best':'Record','Record':'Record','Streak':'Serie','Goals':'Goluri','Shots on target':'Șuturi pe poartă',
+ 'Quick finish':'Final rapid','Lap':'Tura','Position':'Locul','Race length':'Lungimea cursei','Track':'Pistă','Beach Bay':'Golful cu plajă','Canyon Run':'Canionul','Kick':'Șut','Keeper':'Portar','Saved':'Apărat','GOAL!':'GOL!','Goal!':'Gol!','Missed':'Ratat',
+ 'Next':'Mai departe','Start game':'Începe jocul','Pick a topic':'Alege o temă','Pick a level':'Alege nivelul','Time limit':'Limită de timp'};
+const GAME_P=[[/^(\d+) in a row$/,m=>`${m[1]} la rând`],[/^(\d+) lives? left$/,m=>`${m[1]} ${m[1]==='1'?'viață rămasă':'vieți rămase'}`],[/^(\d+) laps?$/,m=>`${m[1]} ${m[1]==='1'?'tură':'ture'}`],[/^(\d+) shots$/,m=>`${m[1]} lovituri`],
+ [/^(\d+) penalties$/,m=>`${m[1]} lovituri`],[/^Shot (\d+)\/(\d+)$/,m=>`Lovitura ${m[1]}/${m[2]}`],[/^Best (\d+)$/,m=>`Record ${m[1]}`],[/^Record (\d+)$/,m=>`Record ${m[1]}`],[/^Step (\d+) of (\d+)$/,m=>`Pasul ${m[1]} din ${m[2]}`],
+ [/^of (\d+) racers$/,m=>`din ${m[1]} piloți`],[/^(\d+) topics$/,m=>`${m[1]} teme`],[/^(\d+) topics · (\d+) units?$/,m=>`${m[1]} teme · ${m[2]} ${m[2]==='1'?'unitate':'unități'}`],[/^Start · (.+)$/,m=>`Start · ${m[1]}`],[/^best (\d+)$/,m=>`record ${m[1]}`],
+ [/^(\d+) pts$/,m=>`${m[1]} pct`],[/^(\d+) points$/,m=>`${m[1]} puncte`],[/^(\d+)% right$/,m=>`${m[1]}% corecte`],[/^(\d+)% right · (\d+) quick$/,m=>`${m[1]}% corecte · ${m[2]} rapide`],[/^(\d+) floors?$/,m=>`${m[1]} ${m[1]==='1'?'etaj':'etaje'}`],
+ [/^Lap (\d+)\/(\d+)$/,m=>`Tura ${m[1]}/${m[2]}`],[/^(\d+)(st|nd|rd|th) \/ (\d+)$/,m=>`Locul ${m[1]} / ${m[3]}`],[/^(.+?) · (.+)$/,null]];
+
+function trG(t){if(SKIP.has(t))return null;if(GAME_RO[t]!=null)return GAME_RO[t];if(NAMES_RO[t]!=null)return NAMES_RO[t];
+  for(const [re,f] of GAME_P){const m=re.exec(t);if(!m)continue;if(f){const r=f(m);if(r!=null)return r}
+    else{const parts=t.split(' · ');let hit=false;const out=parts.map(x=>{const r=SKIP.has(x)?null:(GAME_RO[x]??NAMES_RO[x]??null);if(r!=null){hit=true;return r}return x});if(hit)return out.join(' · ')}}
+  return null}
+function startI18n(){if(typeof document==='undefined'||typeof MutationObserver==='undefined')return;
+  const ATTR=['placeholder','aria-label','title'],seen=new WeakMap();
+  const text=n=>{const p=n.parentElement;if(!p||p.closest('script,style,svg,textarea,[data-noi18n]'))return;const v=n.nodeValue,k=v.trim();if(!k||seen.get(n)===v||!/[A-Za-z]/.test(k))return;
+    const r=trG(k);const out=r!=null?v.replace(k,r):v;seen.set(n,out);if(out!==v)n.nodeValue=out};
+  const attr=e=>{if(e.closest('svg,[data-noi18n]'))return;for(const a of ATTR){const v=e.getAttribute(a);if(!v)continue;const r=trG(v);if(r!=null&&r!==v)e.setAttribute(a,r)}};
+  const walk=root=>{if(root.nodeType===3)return text(root);if(root.nodeType!==1)return;attr(root);const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT|NodeFilter.SHOW_ELEMENT);let n;
+    while(n=w.nextNode()){if(n.nodeType===3)text(n);else attr(n)}};
+  let busy=false;const mo=new MutationObserver(l=>{if(busy)return;busy=true;try{l.forEach(m=>{if(m.type==='characterData')text(m.target);else if(m.type==='attributes')attr(m.target);else m.addedNodes.forEach(walk)})}finally{busy=false}});
+  const go=()=>{document.documentElement.lang='ro';walk(document.body);mo.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTR})};
+  if(document.body)go();else document.addEventListener('DOMContentLoaded',go)}
+const pageLang=(()=>{try{if(typeof window!=='undefined'&&window.EDU_I18N)return null;const q=new URLSearchParams(location.search).get('lang');if(q==='ro'||q==='en')return q;
+  const s=localStorage.getItem('edu-lang');if(s==='ro'||s==='en')return s;return /^ro\b/i.test(navigator.language||'')?'ro':'en'}catch(e){return null}})();
 window.EduQ={SUBJECTS,SICON,SHUE,DIFFNAME,findTopic,stream,setLevel:l=>{LEVEL=l},shuffle,ri:ri_,
   REGIONS,getRegions,setRegions,parseRegions,regionLabel,regionPicker,COUNTRY_COUNT:COUNTRIES.length,
-  hasUnits,topicsOf,topicTabs,customRow};
+  hasUnits,topicsOf,topicTabs,customRow,setLang,getLang,T:t=>LANG==='ro'?(trG(t)??t):t};
+if(pageLang==='ro'){setLang('ro');startI18n()}
 })();
