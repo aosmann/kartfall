@@ -1,4 +1,5 @@
-/* EduQ v5.1 — v5.1: topic settings (topic.opts, read from ?o_<key>= in the game's address: Quick sums range and
+/* EduQ v5.2 — v5.2: Math tidied up: Basic math replaces Quick sums, Two digits and Division (Times tables has ÷ too).
+   EduQ v5.1 — v5.1: topic settings (topic.opts, read from ?o_<key>= in the game's address: Quick sums range and
    operations, Times tables pick the tables) and teacher question sets (?qset= carries the set; it shows up as the
    subject 'My questions', outside Mix).
    EduQ v5 — v5: Romanian (EduQ.setLang('ro')): questions for every subject except English, subject and topic names, continents, levels.
@@ -609,19 +610,14 @@ const SUBJECTS=[
   {id:'en-u1',name:'A2 · Unit 1',bl:'Check it! A2 · routines, free time, town',d:1,unit:'Check it! A2',gen:enUnit1},
   {id:'en-b2u2',name:'B2+ · Unit 2',bl:'Check it! B2+ · modals, cars and the road, take/make/do',d:2,unit:'Check it! B2+',gen:enUnit2}]},
  {id:'math',name:'Math',g:'+−',blurb:'Mental arithmetic, fast',topics:[
-  {id:'basic',name:'Basic math',bl:'pick + − × ÷ and how big the numbers get',d:1,gen:basicMath,opts:[
+  {id:'basic',name:'Basic math',bl:'+ − × ÷ · you pick how big the numbers get',d:1,gen:basicMath,opts:[
     {key:'ops',label:'Operations',multi:true,options:[['+','+'],['-','−'],['x','×'],['d','÷']],def:'+-xd'},
     {key:'max',label:'Numbers up to',options:[['','By level'],['10','10'],['20','20'],['100','100'],['1000','1000']],custom:{min:5,max:1000000}}]},
-  {id:'sums',name:'Quick sums',bl:'add and subtract up to 20',d:1,gen:quickSums,opts:[
-    {key:'max',label:'Numbers up to',options:[['','By level'],['10','10'],['20','20'],['100','100'],['1000','1000']],custom:{min:5,max:1000000}},
-    {key:'ops',label:'Operations',options:[['+-','+ and −'],['+','+ only'],['-','− only']]}]},
-  {id:'twodigits',name:'Two digits',bl:'47 + 28, 83 − 36',d:2,gen:twoDigits},
-  {id:'times',name:'Times tables',bl:'2× up to 12×',d:2,gen:times,opts:[
+  {id:'times',name:'Times tables',bl:'pick the tables · × and ÷',d:1,gen:times,opts:[
     {key:'tables',label:'Tables',multi:true,options:[['2','×2'],['3','×3'],['4','×4'],['5','×5'],['6','×6'],['7','×7'],['8','×8'],['9','×9'],['10','×10'],['11','×11'],['12','×12']]},
     {key:'ops',label:'Operations',options:[['x','× multiply'],['d','÷ divide'],['xd','both']]}]},
-  {id:'division',name:'Division',bl:'tables in reverse',d:2,gen:division},
+  {id:'negatives',name:'Negative numbers',bl:'below zero and back',d:2,gen:negatives},
   {id:'percent',name:'Percentages',bl:'10%, 25%, 75% of a number',d:3,gen:ro('percent',percent)},
-  {id:'negatives',name:'Negative numbers',bl:'below zero and back',d:3,gen:negatives},
   {id:'squares',name:'Squares and roots',bl:'12², √81',d:3,gen:squares},
   {id:'order',name:'Order of operations',bl:'multiply before you add',d:3,gen:order}]},
  {id:'geo',name:'Geography',g:'◎',blurb:'Countries, capitals and flags',topics:[
@@ -769,7 +765,7 @@ function stream(topic,level,opts){opts=opts||{};const used=new Set(),recent=[],d
 /* language for questions and names: 'en' (default) or 'ro'. English topics stay English. */
 const NAMES_RO={English:'Engleză','Grammar, words and spelling':'Gramatică, vocabular și ortografie','Irregular verbs':'Verbe neregulate',Opposites:'Antonime',Tenses:'Timpuri verbale',Prepositions:'Prepoziții',Spelling:'Ortografie','Phrasal verbs':'Verbe frazale',
  'the words everyone gets wrong':'cuvintele pe care le greșește toată lumea','present, past, perfect, continuous':'prezent, trecut, perfect, continuu','hot and cold, win and lose':'hot și cold, win și lose',
- 'My questions':'Întrebările mele','Questions made by your teacher':'Întrebări făcute de profesorul tău', Math:'Matematică','Mental arithmetic, fast':'Calcul mintal, rapid','Quick sums':'Adunări rapide','Basic math':'Calcul de bază','pick + − × ÷ and how big the numbers get':'alegi + − × ÷ și cât de mari sunt numerele','add and subtract up to 20':'adunări și scăderi până la 20','Two digits':'Numere de două cifre','Times tables':'Tabla înmulțirii','2× up to 12×':'de la 2× la 12×',
+ 'My questions':'Întrebările mele','Questions made by your teacher':'Întrebări făcute de profesorul tău', Math:'Matematică','Mental arithmetic, fast':'Calcul mintal, rapid','Quick sums':'Adunări rapide','Basic math':'Calcul de bază','+ − × ÷ · you pick how big the numbers get':'+ − × ÷ · alegi cât de mari sunt numerele','pick the tables · × and ÷':'alegi tablele · × și ÷','add and subtract up to 20':'adunări și scăderi până la 20','Two digits':'Numere de două cifre','Times tables':'Tabla înmulțirii','2× up to 12×':'de la 2× la 12×',
  Division:'Împărțire','tables in reverse':'tabla, invers',Percentages:'Procente','10%, 25%, 75% of a number':'10%, 25%, 75% dintr-un număr','Negative numbers':'Numere negative','below zero and back':'sub zero și înapoi',
  'Squares and roots':'Pătrate și radicali','Order of operations':'Ordinea operațiilor','multiply before you add':'înmulțirea înaintea adunării',
  Geography:'Geografie','Countries, capitals and flags':'Țări, capitale și steaguri',Capitals:'Capitale','Guess the flag':'Ghicește steagul','pick the continents':'alege continentele',
