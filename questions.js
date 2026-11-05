@@ -1,4 +1,5 @@
-/* EduQ v5.2 — v5.2: Math tidied up: Basic math replaces Quick sums, Two digits and Division (Times tables has ÷ too).
+/* EduQ v5.3 — v5.3: units belong to classes (topic.grade, e.g. [5]); a unit's skills are a settings row (o_skills=a|b, or all = mix).
+   EduQ v5.2 — v5.2: Math tidied up: Basic math replaces Quick sums, Two digits and Division (Times tables has ÷ too).
    EduQ v5.1 — v5.1: topic settings (topic.opts, read from ?o_<key>= in the game's address: Quick sums range and
    operations, Times tables pick the tables) and teacher question sets (?qset= carries the set; it shows up as the
    subject 'My questions', outside Mix).
@@ -340,7 +341,10 @@ const units=fixedL({1:[["Bits in 1 byte","8","4","16"],["Binary uses 0 and…","
 
 /* ---- Subjects & topics ---- */
 /* ---- English units (a class's textbook units). Short, fast questions; a unit topic has unit:'<book>' ---- */
-const fixedT=b=>byLv(b,list=>{const d=deck(list);return()=>{const [q,c,a,b2,tag]=d();return{q,c,w:[a,b2],tag}}});
+/* unit questions [q, right, wrong, wrong, skill]; o_skills=a|b keeps only those skills (from any level if one level has none) */
+const fixedT=b=>{const SK=String(TOPT.skills||'').split('|').map(x=>x.trim()).filter(Boolean),all=[1,2,3].flatMap(l=>b[l]||[]);
+  const tags=[...new Set(all.map(r=>r[4]).filter(Boolean))],use=SK.filter(x=>tags.includes(x)),pick=list=>{if(!use.length)return list;const f=list.filter(r=>use.includes(r[4]));return use.every(x=>f.some(r=>r[4]===x))?f:all.filter(r=>use.includes(r[4]))};
+  const g=byLv(b,list=>{const d=deck(pick(list));return()=>{const [q,c,a,b2,tag]=d();return{q,c,w:[a,b2],tag}}});g.tags=tags;return g};
 const enUnit1=fixedT({1:[
  ["___ Monday", "on", "in", "at", "Prepositions of time"],
  ["___ 7 o'clock", "at", "on", "in", "Prepositions of time"],
@@ -607,8 +611,8 @@ const SUBJECTS=[
   {id:'prepositions',name:'Prepositions',bl:'good at, afraid of, wait for',d:2,gen:prepositions},
   {id:'spelling',name:'Spelling',bl:'the words everyone gets wrong',d:2,gen:spelling},
   {id:'phrasal',name:'Phrasal verbs',bl:'give up, look into, call off',d:3,gen:phrasal},
-  {id:'en-u1',name:'A2 · Unit 1',bl:'Check it! A2 · routines, free time, town',d:1,unit:'Check it! A2',gen:enUnit1},
-  {id:'en-b2u2',name:'B2+ · Unit 2',bl:'Check it! B2+ · modals, cars and the road, take/make/do',d:2,unit:'Check it! B2+',gen:enUnit2}]},
+  {id:'en-u1',name:'Unit 1',bl:'Check it! A2 · routines, free time, town',d:1,unit:'Check it! A2',grade:[5],gen:enUnit1},
+  {id:'en-b2u2',name:'Unit 2',bl:'Check it! B2+ · modals, cars and the road, take/make/do',d:2,unit:'Check it! B2+',grade:[5],gen:enUnit2}]},
  {id:'math',name:'Math',g:'+−',blurb:'Mental arithmetic, fast',topics:[
   {id:'basic',name:'Basic math',bl:'+ − × ÷ · you pick how big the numbers get',d:1,gen:basicMath,opts:[
     {key:'ops',label:'Operations',multi:true,options:[['+','+'],['-','−'],['x','×'],['d','÷']],def:'+-xd'},
@@ -633,6 +637,8 @@ const SUBJECTS=[
   {id:'binary',name:'Binary numbers',bl:'4-bit, both directions',d:2,gen:ro('binary',binary)},
   {id:'python',name:'Python operators',bl:'//, %, **, len()',d:3,gen:python}]},
 ];
+/* a unit's skills become a settings row: tick some, or mix the whole unit */
+SUBJECTS.forEach(s=>s.topics.forEach(t=>{if(t.unit&&t.gen.tags&&t.gen.tags.length&&!t.opts)t.opts=[{key:'skills',label:'Topics in this unit',multi:true,sep:'|',all:'Mix the whole unit',options:t.gen.tags.map(x=>[x,x])}]}));
 const ALL=SUBJECTS.flatMap(s=>s.topics).filter(t=>!t.unit);
 /* a teacher's question set, carried in ?qset= (base64url JSON {id, n: name, q: [[question, right, wrong, wrong, wrong?, image?], …]}) */
 const QSET=(()=>{const raw=URLP.get('qset');if(!raw)return null;
@@ -765,7 +771,7 @@ function stream(topic,level,opts){opts=opts||{};const used=new Set(),recent=[],d
 /* language for questions and names: 'en' (default) or 'ro'. English topics stay English. */
 const NAMES_RO={English:'Engleză','Grammar, words and spelling':'Gramatică, vocabular și ortografie','Irregular verbs':'Verbe neregulate',Opposites:'Antonime',Tenses:'Timpuri verbale',Prepositions:'Prepoziții',Spelling:'Ortografie','Phrasal verbs':'Verbe frazale',
  'the words everyone gets wrong':'cuvintele pe care le greșește toată lumea','present, past, perfect, continuous':'prezent, trecut, perfect, continuu','hot and cold, win and lose':'hot și cold, win și lose',
- 'My questions':'Întrebările mele','Questions made by your teacher':'Întrebări făcute de profesorul tău', Math:'Matematică','Mental arithmetic, fast':'Calcul mintal, rapid','Quick sums':'Adunări rapide','Basic math':'Calcul de bază','+ − × ÷ · you pick how big the numbers get':'+ − × ÷ · alegi cât de mari sunt numerele','pick the tables · × and ÷':'alegi tablele · × și ÷','add and subtract up to 20':'adunări și scăderi până la 20','Two digits':'Numere de două cifre','Times tables':'Tabla înmulțirii','2× up to 12×':'de la 2× la 12×',
+ 'My questions':'Întrebările mele','Questions made by your teacher':'Întrebări făcute de profesorul tău', Math:'Matematică','Mental arithmetic, fast':'Calcul mintal, rapid','Topics in this unit':'Temele din unitate','Mix the whole unit':'Toată unitatea amestecat','Unit 1':'Unitatea 1','Unit 2':'Unitatea 2','Basic math':'Calcul de bază','+ − × ÷ · you pick how big the numbers get':'+ − × ÷ · alegi cât de mari sunt numerele','pick the tables · × and ÷':'alegi tablele · × și ÷','add and subtract up to 20':'adunări și scăderi până la 20','Two digits':'Numere de două cifre','Times tables':'Tabla înmulțirii','2× up to 12×':'de la 2× la 12×',
  Division:'Împărțire','tables in reverse':'tabla, invers',Percentages:'Procente','10%, 25%, 75% of a number':'10%, 25%, 75% dintr-un număr','Negative numbers':'Numere negative','below zero and back':'sub zero și înapoi',
  'Squares and roots':'Pătrate și radicali','Order of operations':'Ordinea operațiilor','multiply before you add':'înmulțirea înaintea adunării',
  Geography:'Geografie','Countries, capitals and flags':'Țări, capitale și steaguri',Capitals:'Capitale','Guess the flag':'Ghicește steagul','pick the continents':'alege continentele',
