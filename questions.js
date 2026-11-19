@@ -1,4 +1,5 @@
-/* EduQ v5.4 — v5.4: same question order for everyone (?qseed=<n>): every EduQ.stream() draws from a seeded generator,
+/* EduQ v5.5 — v5.5: a teacher's set in its own order (?qorder=1 with ?qset=): question 1, 2, 3… for everyone.
+   EduQ v5.4 — v5.4: same question order for everyone (?qseed=<n>): every EduQ.stream() draws from a seeded generator,
    so students with the same qseed get the same questions in the same order, with the answers in the same places.
    EduQ v5.3 — v5.3: units belong to classes (topic.grade, e.g. [5]); a unit's skills are a settings row (o_skills=a|b, or all = mix).
    EduQ v5.2 — v5.2: Math tidied up: Basic math replaces Quick sums, Two digits and Division (Times tables has ÷ too).
@@ -17,7 +18,7 @@
 (function(){
 let LEVEL=1;const LV=()=>LEVEL;
 const URLP=(()=>{try{return new URLSearchParams(location.search)}catch(e){return new URLSearchParams('')}})();
-const QSEED=Math.floor(+URLP.get('qseed'))||0;
+const QSEED=Math.floor(+URLP.get('qseed'))||0,QORDER=URLP.get('qorder')==='1';
 /* small seeded generator (mulberry32) for ?qseed= */
 const seeded=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
 const TOPT={};URLP.forEach((v,k)=>{if(k.slice(0,2)==='o_')TOPT[k.slice(2)]=v});
@@ -648,9 +649,9 @@ const ALL=SUBJECTS.flatMap(s=>s.topics).filter(t=>!t.unit);
 /* a teacher's question set, carried in ?qset= (base64url JSON {id, n: name, q: [[question, right, wrong, wrong, wrong?, image?], …]}) */
 const QSET=(()=>{const raw=URLP.get('qset');if(!raw)return null;
   try{const b=atob(raw.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((raw.length+3)%4)),t=decodeURIComponent(escape(b)),d=JSON.parse(t);
-    const q=(d&&Array.isArray(d.q)?d.q:[]).filter(r=>Array.isArray(r)&&r[0]&&r[1]&&r.slice(2,5).filter(Boolean).length>=1);return q.length?{id:String(d.id||'myset'),n:String(d.n||'My questions'),q}:null}catch(e){return null}})();
+    const q=(d&&Array.isArray(d.q)?d.q:[]).filter(r=>Array.isArray(r)&&r[0]&&r[1]&&r.slice(2,5).filter(Boolean).length>=1);return q.length?{id:String(d.id||'myset'),n:String(d.n||'My questions'),q,at:0}:null}catch(e){return null}})();
 if(QSET)SUBJECTS.push({id:'mine',name:'My questions',g:'★',blurb:'Questions made by your teacher',topics:[{id:QSET.id,name:QSET.n,bl:QSET.q.length+' questions',d:2,own:true,
-  gen:()=>{const r=QSET.q[ri_(0,QSET.q.length-1)],w=shuffle(r.slice(2,5).filter(Boolean).map(String));return{q:String(r[0]),c:String(r[1]),w:w.slice(0,2),img:r[5]||null}}}]});
+  gen:()=>{const r=QORDER?QSET.q[QSET.at++%QSET.q.length]:QSET.q[ri_(0,QSET.q.length-1)],w=shuffle(r.slice(2,5).filter(Boolean).map(String));return{q:String(r[0]),c:String(r[1]),w:w.slice(0,2),img:r[5]||null}}}]});
 SUBJECTS.push({id:'mix',name:'Mix it up',g:'✳',blurb:'Questions from every subject',topics:[
   {id:'mix-easy',name:'Easy mix',bl:'every easy topic',d:1,gen:()=>{const p=ALL.filter(t=>t.d===1);return p[ri_(0,p.length-1)].gen()}},
   {id:'mix-all',name:'Surprise me',bl:'any topic, any subject',d:2,gen:()=>ALL[ri_(0,ALL.length-1)].gen()},
@@ -757,19 +758,22 @@ function topicTabs(s,t,onPick){if(!hasUnits(s))return null;
     b.onclick=e=>{e.stopPropagation();if(id===cur)return;const l=s.topics.filter(x=>!!x.unit===(id==='units'));if(l.length&&onPick)onPick(l[0].id)};box.append(b)});
   eqTone(box);return box}
 function stream(topic,level,opts){opts=opts||{};const used=new Set(),recent=[],dry=new Set();
+  if(QSET&&topic&&topic.own)QSET.at=0;
   /* with ?qseed=, each question is drawn with Math.random swapped for the seeded generator */
   const rng=QSEED?seeded(QSEED):null;if(rng){const step=raw();const next=()=>{const r=Math.random;Math.random=rng;try{const q=step();next.exhausted=step.exhausted;return q}finally{Math.random=r}};next.exhausted=false;next.regions=step.regions;return next}
   return raw();
   function raw(){
   const regs=topic&&topic.regions?(opts.regions?parseRegions(opts.regions.join?opts.regions.join(','):opts.regions):getRegions(topic.id)):null;
   const order=[level,...[1,2,3].filter(l=>l!==level).sort((a,b)=>Math.abs(a-level)-Math.abs(b-level)||b-a)];
+  const seq=QORDER&&topic&&topic.own;
   function next(){let Q,k,repeat=false,found=false;
     REG=regs;
+    if(seq){Q=topic.gen();k=qKey(Q);repeat=used.has(k);if(repeat)next.exhausted=true}else{
     for(const l of order){if(dry.has(l))continue;LEVEL=l;
       for(let g=0;g<150;g++){Q=topic.gen();k=qKey(Q);if(!used.has(k)){found=true;break}}
       if(found)break;dry.add(l)}
     LEVEL=level;
-    if(!found){repeat=true;next.exhausted=true;for(let g=0;g<60;g++){Q=topic.gen();k=qKey(Q);if(!recent.includes(k))break}}
+    if(!found){repeat=true;next.exhausted=true;for(let g=0;g<60;g++){Q=topic.gen();k=qKey(Q);if(!recent.includes(k))break}}}
     REG=null;
     used.add(k);recent.push(k);if(recent.length>12)recent.shift();
   const c=String(Q.c),seen=new Set([c]);const raw=Q.w.slice(0,2);while(raw.length<2)raw.push(c);
