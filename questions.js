@@ -1,4 +1,6 @@
-/* EduQ v5.3 — v5.3: units belong to classes (topic.grade, e.g. [5]); a unit's skills are a settings row (o_skills=a|b, or all = mix).
+/* EduQ v5.4 — v5.4: same question order for everyone (?qseed=<n>): every EduQ.stream() draws from a seeded generator,
+   so students with the same qseed get the same questions in the same order, with the answers in the same places.
+   EduQ v5.3 — v5.3: units belong to classes (topic.grade, e.g. [5]); a unit's skills are a settings row (o_skills=a|b, or all = mix).
    EduQ v5.2 — v5.2: Math tidied up: Basic math replaces Quick sums, Two digits and Division (Times tables has ÷ too).
    EduQ v5.1 — v5.1: topic settings (topic.opts, read from ?o_<key>= in the game's address: Quick sums range and
    operations, Times tables pick the tables) and teacher question sets (?qset= carries the set; it shows up as the
@@ -15,6 +17,9 @@
 (function(){
 let LEVEL=1;const LV=()=>LEVEL;
 const URLP=(()=>{try{return new URLSearchParams(location.search)}catch(e){return new URLSearchParams('')}})();
+const QSEED=Math.floor(+URLP.get('qseed'))||0;
+/* small seeded generator (mulberry32) for ?qseed= */
+const seeded=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
 const TOPT={};URLP.forEach((v,k)=>{if(k.slice(0,2)==='o_')TOPT[k.slice(2)]=v});
 const ri_=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -752,6 +757,10 @@ function topicTabs(s,t,onPick){if(!hasUnits(s))return null;
     b.onclick=e=>{e.stopPropagation();if(id===cur)return;const l=s.topics.filter(x=>!!x.unit===(id==='units'));if(l.length&&onPick)onPick(l[0].id)};box.append(b)});
   eqTone(box);return box}
 function stream(topic,level,opts){opts=opts||{};const used=new Set(),recent=[],dry=new Set();
+  /* with ?qseed=, each question is drawn with Math.random swapped for the seeded generator */
+  const rng=QSEED?seeded(QSEED):null;if(rng){const step=raw();const next=()=>{const r=Math.random;Math.random=rng;try{const q=step();next.exhausted=step.exhausted;return q}finally{Math.random=r}};next.exhausted=false;next.regions=step.regions;return next}
+  return raw();
+  function raw(){
   const regs=topic&&topic.regions?(opts.regions?parseRegions(opts.regions.join?opts.regions.join(','):opts.regions):getRegions(topic.id)):null;
   const order=[level,...[1,2,3].filter(l=>l!==level).sort((a,b)=>Math.abs(a-level)-Math.abs(b-level)||b-a)];
   function next(){let Q,k,repeat=false,found=false;
@@ -766,7 +775,7 @@ function stream(topic,level,opts){opts=opts||{};const used=new Set(),recent=[],d
   const c=String(Q.c),seen=new Set([c]);const raw=Q.w.slice(0,2);while(raw.length<2)raw.push(c);
   const w=raw.map(v=>{let x=String(v);while(seen.has(x))x=isNaN(+x)?x+'s':String(+x+1);seen.add(x);return x});
   const ans=shuffle([c,...w]);skip(Q.q);ans.forEach(skip);return{q:Q.q,img:Q.img||null,code:Q.code||null,tag:Q.tag||null,ans,correct:ans.indexOf(c),answer:c,repeat}}
-  next.exhausted=false;next.regions=regs;return next}
+  next.exhausted=false;next.regions=regs;return next}}
 
 /* language for questions and names: 'en' (default) or 'ro'. English topics stay English. */
 const NAMES_RO={English:'Engleză','Grammar, words and spelling':'Gramatică, vocabular și ortografie','Irregular verbs':'Verbe neregulate',Opposites:'Antonime',Tenses:'Timpuri verbale',Prepositions:'Prepoziții',Spelling:'Ortografie','Phrasal verbs':'Verbe frazale',
